@@ -1,12 +1,15 @@
+#!/usr/bin/env python
+from codecs import open
+
 from setuptools import setup
 
 
-with open("README.md", "r") as f:
+with open("README.md", "r", "utf-8") as f:
     readme = f.read()
 
 setup(
     name="pubproxpy",
-    version="0.1.1",
+    version="0.1.2",
     description="A public proxy list provider using the pubproxy.com API",
     long_description=readme,
     long_description_content_type="text/markdown",
