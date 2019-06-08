@@ -58,7 +58,7 @@ anon_proxies = pf.get_proxies(20)
 
 ## Documentation
 
-Getting proxies is fully handled by the `ProxyFetcher` class. There are several parameters you can pass on initialization, by using `set_params`, or by using `update_params` to narrow down the proxies to a suitable range. From there you can just call `get_proxy` to receive a proxy in the form of `{ip-address}:{port-number}` or `get_proxies(amount)` to receive a list of `amount` proxies. Also there is an internal blacklist to ensure that the same proxy ip and port combo will not be used more than once per `ProxyFetcher`.
+Getting proxies is fully handled by the `ProxyFetcher` class. There are several parameters you can pass on initialization, by using `set_params`, or by using `update_params` to narrow down the proxies to a suitable range. From there you can just call `get_proxy` to receive a proxy in the form of `{ip-address}:{port-number}` or call `get_proxies(amount)` to receive a list of `amount` proxies. Also there is an internal blacklist to ensure that the same proxy ip and port combo will not be used more than once per `ProxyFetcher`.
 
 ### `ProxyFetcher` Parameters
 
