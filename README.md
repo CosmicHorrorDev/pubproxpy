@@ -4,7 +4,9 @@ An easy to use Python wrapper for [pubproxy](http://pubproxy.com)'s public proxy
 
 ## Installation
 
-**TODO: publish on PyPI**
+```bash
+$ pip install pubproxpy
+```
 
 ## Keyless API Limitations
 
