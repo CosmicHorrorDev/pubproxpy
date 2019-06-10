@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pubproxpy"
-version = "0.1.2"
+version = "0.1.8"
 description = "An easy to use Python wrapper for pubproxy.com"
 authors = ["LovecraftianHorror <LovecraftianHorror@pm.me>"]
 

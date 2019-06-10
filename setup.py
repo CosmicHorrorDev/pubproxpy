@@ -1,24 +1,25 @@
 #!/usr/bin/env python
-from codecs import open
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
-with open("README.md", "r", "utf-8") as f:
+with open("README.md") as f:
     readme = f.read()
+
+with open("LICENSE") as f:
+    license = f.read()
 
 setup(
     name="pubproxpy",
-    version="0.1.2",
+    version="0.1.8",
     description="A public proxy list provider using the pubproxy.com API",
     long_description=readme,
     long_description_content_type="text/markdown",
-    url="https://github.com/LovecraftianHorror/pubproxpy",
     author="LovecraftianHorror",
     author_email="LovecraftianHorror@pm.me",
-    packages=["pubproxpy"],
-    python_requires=">=3.6.0",
-    install_requires=["requests>=2.22.0"],
-    license="GPLv3",
-    zip_safe=False,
+    url="https://github.com/LovecraftianHorror/pubproxpy",
+    packages=find_packages(exclude=("tests", "docs")),
+    install_requires=["requests"],
+    classifiers=["Programming Language :: Python :: 3.6"],
+    keywords=["proxy", "public proxy", "pubproxy api", "proxy api" "pubproxy"],
 )
