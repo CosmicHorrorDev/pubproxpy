@@ -4,6 +4,8 @@ An easy to use Python wrapper for [pubproxy](http://pubproxy.com)'s public proxy
 
 ## Installation
 
+Install the pybproxpy package using your standard Python package manager e.g.
+
 ```bash
 $ pip install pubproxpy
 ```
@@ -12,11 +14,11 @@ $ pip install pubproxpy
 
 ### API Daily Limits
 
-At the time of writing this, without an API key the pubproxy API limits users to 5 proxies per request and 50 requests per day. The limit of 5 is always used to minimize rate limiting along with getting the most proxies possible within the request limit.
+At the time of writing this, without an API key the pubproxy API limits users to 5 proxies per request and 50 requests per day. The maximum proxies per request is always used to minimize rate limiting along with getting the most proxies possible within the request limit.
 
 ### API Rate Limiting
 
-Without an API key pubproxy limits users to one request per second so a `ProxyFetcher` will try to ensure that at most only one request per second is done without an API key. This is synchronized between `ProxyFetcher`s, but this is not thread safe so make sure all `ProxyFetcher`s are on the same thread if you have no API key. The rate limiting is quite sever, upon being hit the API seems to deny requests for several minutes/hours.
+Without an API key pubproxy limits users to one request per second so a `ProxyFetcher` will try to ensure that at most only one request per second is done without an API key. This is synchronized between `ProxyFetcher`s, but this is not thread safe so make sure all `ProxyFetcher`s are on the same thread if you have no API key. The rate limiting is quite severe, upon being hit the API seems to deny requests for several minutes/hours.
 
 ## Quickstart Example
 
@@ -29,11 +31,11 @@ http_pf = ProxyFetcher(protocol="http", https=True, level="elite",
                        time_to_connect=15)
 
 # ProxyFetcher for proxies that use the socks5 protocol, are located in
-# the US and Canada and support POST requests
+# the US or Canada and support POST requests
 socks_pf = ProxyFetcher(protocol="socks5", countries=["US", "CA"], post=True)
 
 # Get and print 10 of each kind of proxy, even though there are multiple
-# `ProxyFetcher`s delays will be coordinated to prevent rate limiting
+# `ProxyFetcher`s, the delays will be coordinated to prevent rate limiting
 for _ in range(10):
     https_proxy = http_pf.get_proxy()
     socks_proxy = socks_pf.get_proxy()
@@ -50,7 +52,7 @@ from pubproxpy import ProxyFetcher
 pf = ProxyFetcher(level="elite", countries="FR")
 elite_proxy = pf.get_proxy()
 
-# Now get 20 elite proxies from anywhere but France and Ireland that support
+# Now get 20 elite proxies from anywhere except France and Ireland that support
 # post requests
 # NOTE: setting `not_countries` will remove `countries` since they're
 #       incompatible
@@ -79,4 +81,4 @@ Getting proxies is fully handled by the `ProxyFetcher` class. There are several 
 |`https`|`bool`|Supports https requests|
 |`post`|`bool`|Supports post requests|
 |`referer`|`bool`|Supports referer requests|
-|`user\_agent`|`bool`|Supports user-agent requests|
+|`user_agent`|`bool`|Supports user-agent requests|
