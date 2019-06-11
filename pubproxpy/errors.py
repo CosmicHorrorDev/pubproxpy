@@ -1,14 +1,18 @@
 class ProxyError(Exception):
-    pass
+    """Generic base error
+    """
 
 
 class APIKeyError(ProxyError):
-    pass
+    """Error for incorrect API key response
+    """
 
 
 class RateLimitError(ProxyError):
-    pass
+    """Error for rate limiting response
+    """
 
 
 class DailyLimitError(ProxyError):
-    pass
+    """Error for hitting the daily request limit
+    """
