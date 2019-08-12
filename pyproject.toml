@@ -6,7 +6,7 @@ license = "GPL-3.0"
 authors = ["LovecraftianHorror <LovecraftianHorror@pm.me>"]
 readme = "README.md"
 repository = "https://github.com/LovecraftianHorror/pubproxpy"
-keywords = ["proxy api", "pubproxy", "public proxy", "pubproxy api"]
+keywords = ["proxy api", "pubproxy", "public proxy", "pubproxy api", "scraping"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
