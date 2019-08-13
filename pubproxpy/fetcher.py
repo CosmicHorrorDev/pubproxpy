@@ -2,8 +2,6 @@
 # TODO: update documentation after all changes are made
 # TODO: add `exclude_used` to the docs
 # TODO: check for error with using a proxy to get proxies
-# TODO: Add table of contents to readme
-# TODO: Update readme based on new setup
 # TODO: `rg` to find any other todos before release
 # TODO: specify what params can't be checked for correctness in readme
 # TODO: mention that rate limiting will still happen from mulitple programs
