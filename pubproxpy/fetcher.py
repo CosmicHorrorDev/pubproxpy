@@ -218,27 +218,15 @@ class ProxyFetcher:
         # Raise the correct error if the response isn't valid
         if not self._valid_resp(resp.text):
             if resp.text == INVALID_API_RESP:
-                raise APIKeyError(
-                    "Invalid API key, make sure you're using a valid API key"
-                )
+                raise APIKeyError
             elif resp.text == RATE_LIMIT_RESP:
-                # TODO: add a comment saying to open an issue on the repo
-                #       if they got this error while using the default
-                #       delay
-                raise RateLimitError("You have exceeded the rate limit")
+                raise RateLimitError
             elif resp.text == DAILY_LIMIT_RESP:
-                raise DailyLimitError("You have exceeded the daily limit")
+                raise DailyLimitError
             elif resp.text == NO_PROXY_RESP:
-                raise NoProxyError(
-                    "No proxies were found using these parameters"
-                    "  consider broadening these params\nParams:{self._params}"
-                )
+                raise NoProxyError
             else:
-                raise ProxyError(
-                    # TODO: add link to github repo?
-                    "There was an unknown response, please report the issue"
-                    f'\nResponse text: "{resp.text}"'
-                )
+                raise ProxyError(resp)
 
         # Update with the new proxies
         proxies = set(resp.text.split("\n"))
