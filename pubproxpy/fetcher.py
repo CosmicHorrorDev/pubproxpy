@@ -1,4 +1,13 @@
 #!/usr/bin/env python3
+# TODO: update documentation after all changes are made
+# TODO: add `exclude_used` to the docs
+# TODO: check for error with using a proxy to get proxies
+# TODO: Add table of contents to readme
+# TODO: Update readme based on new setup
+# TODO: `rg` to find any other todos before release
+# TODO: specify what params can't be checked for correctness in readme
+# TODO: handle case of request failing?
+# TODO: mention that rate limiting will still happen from mulitple programs
 
 import requests
 
@@ -7,22 +16,35 @@ import os
 from time import sleep
 from urllib.parse import urlencode
 
-from .errors import ProxyError, APIKeyError, RateLimitError, DailyLimitError
+from .errors import (
+    ProxyError,
+    APIKeyError,
+    RateLimitError,
+    DailyLimitError,
+    NoProxyError,
+    INVALID_API_RESP,
+    RATE_LIMIT_RESP,
+    DAILY_LIMIT_RESP,
+    NO_PROXY_RESP,
+)
 from .singleton import Singleton
 
 
 class FetcherShared(metaclass=Singleton):
     """This class is used solely for the purpose of synchronizing request times
-    between different `ProxyFetcher`s to prevent rate limiting. NOTE: This is
-    not thread safe
+    and used lists between different `ProxyFetcher`s to prevent rate limiting
+    and reusing old proxies.
+    NOTE: This is not thread safe
     """
 
     def __init__(self):
         self.last_requested = None
+        self.used = set()
 
 
 # TODO: add documentation comments
 # TODO: set up tests for things
+# TODO: move all the constants for ProxyFetcher outside of the class
 class ProxyFetcher:
     _BASE_URI = "http://pubproxy.com/api/proxy?"
     # Parameters used by `ProxyFetcher` for the pubproxy api
@@ -51,67 +73,23 @@ class ProxyFetcher:
     _PARAM_BOUNDS = {"last_checked": (1, 1000), "time_to_connect": (1, 60)}
 
     # Request delay for keyless request limiting in seconds
-    _REQUEST_DELAY = 1.0
+    # Note: Requests are supposed to be limited to 1 per second, but you are
+    #       sometimes rate limited when using 1.0 so 1.05 was picked
+    _REQUEST_DELAY = 1.05
 
-    # All the error messages that are matched against
-    _INVALID_API_RESP = (
-        "Invalid API. Get your API to make unlimited requests at"
-        "  http://pubproxy.com/#premium"
-    )
-    _RATE_LIMIT_RESP = (
-        "We have to temporarily stop you. You're requesting proxies a little"
-        " too fast (2+ requests per second). Get your API to remove this limit"
-        " at http://pubproxy.com/#premium"
-    )
-    _DALY_LIMIT_RESP = (
-        "You have reached the maximum 50 requests for today. Get your API to"
-        " make unlimited requests at http://pubproxy.com/#premium"
-    )
+    def __init__(self, *, exclude_used=True, **params):
+        self._exclude_used = exclude_used
 
-    def __init__(self, **params):
         # Setup `_params` and `_query`
         self._params = self._setup_params(params)
         self._query = f"{self._BASE_URI}{urlencode(self._params)}"
 
-        # Internal list and set used to store new and used proxies
-        self._proxies = []
-        self._used = set()
-
-        # Used to prevent rate limiting
-        self._shared_time = FetcherShared()
-
-    def set_params(self, **params):
-        # Setup `_params` and `_query`
-        self._params = self._setup_params(params)
-        self._query = f"{self._BASE_URI}{urlencode(self._params)}"
-
-        # Clear the current proxy list
+        # List of unused proxies to give
         self._proxies = []
 
-    def update_params(self, **new_params):
-        # Update `_params` and `_query`
-        new_params = self._setup_params(new_params)
-
-        # Special case to keep `country` and `not_country` separate
-        if "country" in new_params and "not_country" in self._params:
-            del self._params["not_country"]
-        elif "not_country" in new_params and "country" in self._params:
-            del self._params["country"]
-
-        for param, val in new_params.items():
-            self._params[param] = val
-        self._query = f"{self._BASE_URI}{urlencode(self._params)}"
-
-        # Clear the current proxy list
-        self._proxies = []
-
-    def clear_params(self, *remove_params):
-        for param in remove_params:
-            assert param in self._PARAMS, (
-                f'invalid parameter "{param}" valid parameters are'
-                f" {[p for p in self._PARAMS]}"
-            )
-            del self._params[param]
+        # Shared data between `ProxyFetcher`s, includes request time and used
+        # list (used list only used if `exclude_used` is True)
+        self._shared = FetcherShared()
 
     def _setup_params(self, params):
         self._verify_params(params)
@@ -130,6 +108,7 @@ class ProxyFetcher:
             " mutually exclusive"
         )
 
+        # Verify all params are valid, and satisfy the valid bounds or options
         for param, val in params.items():
             assert param in self._PARAMS, (
                 f'invalid parameter "{param}" valid parameters are'
@@ -170,9 +149,13 @@ class ProxyFetcher:
 
     def _format_params(self, params):
         params["format"] = "txt"
-        params["limit"] = 5
+        if "api" in params:
+            params["limit"] = 20
+        else:
+            params["limit"] = 5
 
         # Join country and not_country by comma if it's a list or tuple
+        # TODO: is this already done by formatting as a url?
         if "country" in params:
             if isinstance(params["country"], (list, tuple)):
                 params["country"] = ",".join(params["country"])
@@ -182,58 +165,115 @@ class ProxyFetcher:
 
         return params
 
+    # TODO: can't this be simplified down to a `return self.get_proxies(1)[0]`?
+    # TODO: update doc comment
     def get_proxy(self):
-        """Attempt to get a proxy specified by the parameters set in `__init__`
-        or `set_params`, used proxies are added to a blacklist to prevent
-        reuse
+        """Attempt to get a proxy matching specified params, used proxies are
+        added to a blacklist if `exclude_used is True` to prevent reuse
         """
         # Get new proxies if none remain
         while not self._proxies:
             self._fetch()
 
-        # Add proxy to blacklist, then return
+        # Add proxy to blacklist if `_exclude_used`, then return
         proxy = self._proxies.pop()
-        self._used.add(proxy)
+        if self._exclude_used:
+            self._shared.used.add(proxy)
+
         return proxy
 
+    # TODO: add doc comment
     def get_proxies(self, amount):
         # Get new proxies till there is enough for amount
         while len(self._proxies) < amount:
             self._fetch()
 
-        # Store the deisred proxies, remove, then return
+        # Store the deisred proxies in temp and remove from list
         temp = self._proxies[:amount]
         self._proxies = self._proxies[amount:]
+
+        # Add the proxies to the blacklist if `_exclude_used`
+        if self._exclude_used:
+            self._shared.used |= set(temp)
+
         return temp
 
+    # TODO: this should return the proxies instead of automatically adding them
     def _fetch(self):
-        """Attempts to get the proxies from `pubproxy.com` and adds them to
-        `self._proxies`
+        """Attempts to get the proxies from pubproxy.com and adds them to
+        `self._proxies`, will `sleep` to prevent getting rate-limited
         """
-        # Limit number of requests to 1 per second unless api key given
-        last_time = self._shared_time.last_requested
+        # Limit number of requests to 1 per `self._REQUEST_DELAY` unless an api
+        # key is provided
+        last_time = self._shared.last_requested
         if last_time is not None and "api" not in self._params:
             delta = (dt.now() - last_time).total_seconds()
             if delta < self._REQUEST_DELAY:
                 sleep(self._REQUEST_DELAY - delta)
-        self._shared_time.last_requested = dt.now()
+        self._shared.last_requested = dt.now()
 
         # Query the api
         resp = requests.get(self._query)
 
-        # TODO: check these against a regex to see if they match a proxy
-        # Check the response against any errors
-        if resp.text == self._INVALID_API_RESP:
-            raise APIKeyError(
-                "Invalid API key, make sure you're using a valid API key"
-            )
-        elif resp.text == self._RATE_LIMIT_RESP:
-            raise RateLimitError("You have exceeded the rate limit")
-        elif resp.text == self._DALY_LIMIT_RESP:
-            raise DailyLimitError("You have exceeded the daily limit")
+        # Raise the correct error if the response isn't valid
+        if not self._valid_resp(resp.text):
+            if resp.text == INVALID_API_RESP:
+                raise APIKeyError(
+                    "Invalid API key, make sure you're using a valid API key"
+                )
+            elif resp.text == RATE_LIMIT_RESP:
+                # TODO: add a comment saying to open an issue on the repo
+                #       if they got this error while using the default
+                #       delay
+                raise RateLimitError("You have exceeded the rate limit")
+            elif resp.text == DAILY_LIMIT_RESP:
+                raise DailyLimitError("You have exceeded the daily limit")
+            elif resp.text == NO_PROXY_RESP:
+                raise NoProxyError(
+                    "No proxies were found using these parameters"
+                    "  consider broadening these params\nParams:{self._params}"
+                )
+            else:
+                raise ProxyError(
+                    # TODO: add link to github repo?
+                    "There was an unknown response, please report the issue"
+                    f'\nResponse text: "{resp.text}"'
+                )
 
         # Update with the new proxies
         proxies = set(resp.text.split("\n"))
         # Remove any that were already used and update current list
-        proxies -= self._used
+        if self._exclude_used:
+            proxies -= self._shared.used
+
         self._proxies += proxies
+
+    # TODO: add doc comment
+    # TODO: this could likely be simplified by switching to json, strongly
+    #       consider doing this later, this could also be used to verify that
+    #       both `countries` and `not_countries` are correct
+    def _valid_resp(self, resp):
+        if not resp:
+            return False
+
+        for proxy in resp.split("\n"):
+            if not self._valid_proxy(proxy):
+                return False
+
+        return True
+
+    # TODO: add doc comment
+    def _valid_proxy(self, proxy):
+        try:
+            ip, port = proxy.split(":")
+            port = int(port)
+
+            parts = ip.split(".")
+            assert len(parts) == 4  # 4 bytes for ipv4
+            for part in parts:
+                part = int(part)
+                assert 0 <= part <= 255  # Outside byte range
+        except (AssertionError, ValueError):
+            return False
+
+        return True

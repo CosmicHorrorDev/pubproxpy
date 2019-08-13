@@ -4,7 +4,7 @@ An easy to use Python wrapper for [pubproxy](http://pubproxy.com)'s public proxy
 
 ## Installation
 
-Install the pybproxpy package using your standard Python package manager e.g.
+Install the [pubproxpy](https://pypi.org/project/pubproxpy/) package using your standard Python package manager e.g.
 
 ```bash
 $ pip install pubproxpy
@@ -14,7 +14,7 @@ $ pip install pubproxpy
 
 ### API Daily Limits
 
-At the time of writing this, without an API key the pubproxy API limits users to 5 proxies per request and 50 requests per day. The maximum proxies per request is always used to minimize rate limiting along with getting the most proxies possible within the request limit.
+At the time of writing this without an API key the pubproxy API limits users to 5 proxies per request and 50 requests per day. The maximum proxies per request is always used to minimize rate limiting along with getting the most proxies possible within the request limit meaning you should get 250 proxies per day without needing an API key.
 
 ### API Rate Limiting
 
@@ -68,11 +68,11 @@ Getting proxies is fully handled by the `ProxyFetcher` class. There are several 
 
 |Parameter|Type|Description|
 |:--|:--|:--|
-|`api_key`|`int`|API key for a paid account, you can also set `$PUBPROXY_API_KEY` to pass your key, passing the `api_key` parameter will override this|
+|`api_key`|`str`|API key for a paid account, you can also set `$PUBPROXY_API_KEY` to pass your key, passing the `api_key` parameter will override this|
 |`level`|`str`|[Options: anonymous, elite] Proxy anonymity level|
 |`protocol`|`str`|[Options: http, socks4, socks5] The proxy protocol|
-|`countries`|`str` or `list<str>`|locations of the proxy using the [ISO-3166 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) country code, **Incompatible with `not_countries`**|
-|`not_countries`|`str` or `list<str>`|blacklist locations of the proxy using the [ISO-3166 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) country code, **Incompatible with `countries`**|
+|`countries`|`str` or `list<str>`|Locations of the proxy using the [ISO-3166 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) country code, **Incompatible with `not_countries`**|
+|`not_countries`|`str` or `list<str>`|Blacklist locations of the proxy using the [ISO-3166 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) country code, **Incompatible with `countries`**|
 |`last_checked`|`int`|[Bounds: 1-1000] Minutes since the proxy was checked|
 |`port`|`int`|Proxies using a specific port|
 |`time_to_connect`|`int`|[Bounds: 1-60] How many seconds it took for the proxy to connect|
@@ -82,3 +82,15 @@ Getting proxies is fully handled by the `ProxyFetcher` class. There are several 
 |`post`|`bool`|Supports post requests|
 |`referer`|`bool`|Supports referer requests|
 |`user_agent`|`bool`|Supports user-agent requests|
+
+### Exceptions
+
+All the exceptions are defined in `errors.py`
+
+|Exception|Description|
+|:--|:--|
+|`ProxyError`|Base exception that all other pubproxpy errors inherit from|
+|`APIKeyError`|Error raised when the API gives an incorrect API Key response|
+|`RateLimitError`|Error raised when the API gives a rate-limiting response (2+ requests per second)|
+|`DailyLimitError`|Error raised when the API gives the daily request limit response|
+
