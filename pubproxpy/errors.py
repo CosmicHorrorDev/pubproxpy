@@ -37,6 +37,7 @@ _NO_PROXY_ERROR_MESSAGE = (
 class ProxyError(Exception):
     """Generic base error
     """
+
     def __init__(self, response, message=_PROXY_ERROR_MESSAGE):
         super().__init__(f"{message}\n    Response text: {response.text}")
 

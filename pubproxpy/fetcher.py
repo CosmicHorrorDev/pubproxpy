@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
-# TODO: update documentation after all changes are made
-# TODO: add `exclude_used` to the docs
 # TODO: check for error with using a proxy to get proxies
 # TODO: `rg` to find any other todos before release
-# TODO: specify what params can't be checked for correctness in readme
-# TODO: mention that rate limiting will still happen from mulitple programs
 # TODO: strongly type parameters
-# TODO: format with black
 
 import requests
 
