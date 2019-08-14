@@ -2,7 +2,7 @@
 
 An easy to use Python wrapper for [pubproxy](http://pubproxy.com)'s public proxy API.
 
-## 1. Installation
+## Installation
 
 Install the [pubproxpy](https://pypi.org/project/pubproxpy/) package using your standard Python package manager e.g.
 

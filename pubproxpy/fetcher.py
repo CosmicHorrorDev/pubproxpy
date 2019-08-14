@@ -190,7 +190,7 @@ class ProxyFetcher:
 
         # Get enough proxies to satisfy `amount`
         while len(self._proxies) < amount:
-            self._proxie += self._fetch()
+            self._proxies += self._fetch()
 
         # Store the deisred proxies in `temp` and remove from `self._proxies`
         temp = self._proxies[:amount]
