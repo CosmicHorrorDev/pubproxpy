@@ -4,13 +4,15 @@ An easy to use Python wrapper for [pubproxy](http://pubproxy.com)'s public proxy
 
 ## Installation
 
+**NOTE:** The minimum python version for this library is 3.6, check with python -V or python3 -V if you're unsure about your current version.
+
 Install the [pubproxpy](https://pypi.org/project/pubproxpy/) package using your standard Python package manager e.g.
 
 ```bash
 $ pip install pubproxpy
 ```
 
-As always you a recommended to install into a virtual-env
+As always you are recommended to install into a virtual environment.
 
 ## Keyless API Limitations
 
@@ -38,9 +40,9 @@ http_pf = ProxyFetcher(protocol="http", https=True, level="elite",
 
 # Get one socks proxy, followed by 10 https proxies
 # NOTE: even though there are multiple `ProxyFetcher`s the delays are
-#       coordinated to prevent rate limiting
-socks_proxy = socks_pf.get_proxy()     # Returns a single proxy as a string
-https_proxy = http_pf.get_proxies(10)  # Returns a list of proxies as strings
+#       coordinated between them to prevent rate limiting
+socks_proxy = socks_pf.get_proxy()      # Returns a single proxy as a string
+https_proxy = https_pf.get_proxies(10)  # Returns a list of proxies as strings
 
 # Do something with the proxies, like spawn worker threads that use them
 ```
@@ -82,7 +84,7 @@ Keeping it simple (stupid), so just `get_proxy()` and `get_proxies(amount)`.
 
 ### Exceptions
 
-All the exceptions are defined in `errors.py`
+All the exceptions are defined in `errors.py`.
 
 |Exception|Description|
 |:--|:--|
