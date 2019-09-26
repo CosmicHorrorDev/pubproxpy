@@ -10,8 +10,8 @@ import os
 from time import sleep
 from urllib.parse import urlencode
 
-from .errors import ProxyError, API_ERROR_MAP
-from .singleton import Singleton
+from pubproxpy.errors import ProxyError, API_ERROR_MAP
+from pubproxpy.singleton import Singleton
 
 
 class _FetcherShared(metaclass=Singleton):
