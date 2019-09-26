@@ -39,7 +39,10 @@ class ProxyError(Exception):
     """
 
     def __init__(self, response, message=_PROXY_ERROR_MESSAGE):
-        super().__init__(f"{message}\n    Response text: {response.text}")
+        if response is None:
+            super().__init__(message)
+        else:
+            super().__init__(f"{message}\nResponse text: {response.text}")
 
 
 class APIKeyError(ProxyError):
@@ -47,7 +50,7 @@ class APIKeyError(ProxyError):
     """
 
     def __init__(self, message=_API_KEY_ERROR_MESSAGE):
-        super().__init__(message)
+        super().__init__(None, message)
 
 
 class RateLimitError(ProxyError):
@@ -55,7 +58,7 @@ class RateLimitError(ProxyError):
     """
 
     def __init__(self, message=_RATE_LIMIT_ERROR_MESSAGE):
-        super().__init__(message)
+        super().__init__(None, message)
 
 
 class DailyLimitError(ProxyError):
@@ -63,7 +66,7 @@ class DailyLimitError(ProxyError):
     """
 
     def __init__(self, message=_DAILY_LIMIT_ERROR_MESSAGE):
-        super().__init__(message)
+        super().__init__(None, message)
 
 
 class NoProxyError(ProxyError):
@@ -71,7 +74,7 @@ class NoProxyError(ProxyError):
     """
 
     def __init__(self, message=_NO_PROXY_ERROR_MESSAGE):
-        super().__init__(message)
+        super().__init__(None, message)
 
 
 API_ERROR_MAP = {
