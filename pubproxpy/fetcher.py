@@ -10,17 +10,7 @@ import os
 from time import sleep
 from urllib.parse import urlencode
 
-from .errors import (
-    ProxyError,
-    APIKeyError,
-    RateLimitError,
-    DailyLimitError,
-    NoProxyError,
-    INVALID_API_RESP,
-    RATE_LIMIT_RESP,
-    DAILY_LIMIT_RESP,
-    NO_PROXY_RESP,
-)
+from .errors import ProxyError, API_ERROR_MAP
 from .singleton import Singleton
 
 
@@ -221,16 +211,7 @@ class ProxyFetcher:
 
         # Raise the correct error if the response isn't valid
         if not self._valid_resp(resp.text):
-            if resp.text == INVALID_API_RESP:
-                raise APIKeyError
-            elif resp.text == RATE_LIMIT_RESP:
-                raise RateLimitError
-            elif resp.text == DAILY_LIMIT_RESP:
-                raise DailyLimitError
-            elif resp.text == NO_PROXY_RESP:
-                raise NoProxyError
-            else:
-                raise ProxyError(resp)
+            raise API_ERROR_MAP.get(resp.text) or ProxyError(resp)
 
         # Update with the new proxies
         proxies = set(resp.text.split("\n"))

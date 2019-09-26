@@ -72,3 +72,11 @@ class NoProxyError(ProxyError):
 
     def __init__(self, message=_NO_PROXY_ERROR_MESSAGE):
         super().__init__(message)
+
+
+API_ERROR_MAP = {
+    INVALID_API_RESP: APIKeyError,
+    RATE_LIMIT_RESP: RateLimitError,
+    DAILY_LIMIT_RESP: DailyLimitError,
+    NO_PROXY_RESP: NoProxyError,
+}
