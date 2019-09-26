@@ -6,22 +6,14 @@
 import requests
 
 from datetime import datetime as dt
+import json
 import os
 from time import sleep
 from urllib.parse import urlencode
+from sys import exit
 
-from .errors import (
-    ProxyError,
-    APIKeyError,
-    RateLimitError,
-    DailyLimitError,
-    NoProxyError,
-    INVALID_API_RESP,
-    RATE_LIMIT_RESP,
-    DAILY_LIMIT_RESP,
-    NO_PROXY_RESP,
-)
-from .singleton import Singleton
+from pubproxpy.errors import ProxyError, API_ERROR_MAP
+from pubproxpy.singleton import Singleton
 
 
 class _FetcherShared(metaclass=Singleton):
@@ -38,6 +30,7 @@ class _FetcherShared(metaclass=Singleton):
 
 # TODO: set up tests for things
 # TODO: move all the constants for ProxyFetcher outside of the class?
+#       to constants file maybe?
 class ProxyFetcher:
     """Class used to fetch proxies from the pubproxy API matching the provided
     parameters
@@ -162,7 +155,7 @@ class ProxyFetcher:
         """
 
         # Parameters kept outside of the user's control
-        params["format"] = "txt"
+        params["format"] = "json"
         if "api" in params:
             params["limit"] = 20
         else:
@@ -190,7 +183,7 @@ class ProxyFetcher:
 
         # Get enough proxies to satisfy `amount`
         while len(self._proxies) < amount:
-            self._proxie += self._fetch()
+            self._proxies += self._fetch()
 
         # Store the deisred proxies in `temp` and remove from `self._proxies`
         temp = self._proxies[:amount]
@@ -219,57 +212,17 @@ class ProxyFetcher:
         # Query the api
         resp = requests.get(self._query)
 
-        # Raise the correct error if the response isn't valid
-        if not self._valid_resp(resp.text):
-            if resp.text == INVALID_API_RESP:
-                raise APIKeyError
-            elif resp.text == RATE_LIMIT_RESP:
-                raise RateLimitError
-            elif resp.text == DAILY_LIMIT_RESP:
-                raise DailyLimitError
-            elif resp.text == NO_PROXY_RESP:
-                raise NoProxyError
-            else:
-                raise ProxyError(resp)
+        try:
+            data = json.loads(resp.text)["data"]
+        except json.decoder.JSONDecodeError:
+            print(resp)
+            raise API_ERROR_MAP.get(resp.text) or ProxyError(resp)
 
-        # Update with the new proxies
-        proxies = set(resp.text.split("\n"))
+        # Get the returned list of proxies
+        proxies = set([d["ipPort"] for d in data])
+
         # Remove any that were already used and update current list
         if self._exclude_used:
             proxies -= self._shared.used
 
         return proxies
-
-    # TODO: this could likely be simplified by switching to json, strongly
-    #       consider doing this later, this could also be used to verify that
-    #       both `countries` and `not_countries` are correct
-    def _valid_resp(self, resp):
-        """Checks to see if the response contains a list of proxies
-        """
-
-        if not resp:
-            return False
-
-        for proxy in resp.split("\n"):
-            if not self._valid_proxy(proxy):
-                return False
-
-        return True
-
-    def _valid_proxy(self, proxy):
-        """Verifies that `proxy` is in fact a valid ipv4 proxy
-        """
-
-        try:
-            ip, port = proxy.split(":")  # Possible `ValueError`
-            port = int(port)  # Possible `ValueError`
-
-            parts = ip.split(".")  # Possible `ValueError`
-            assert len(parts) == 4  # 4 bytes for ipv4
-            for part in parts:
-                part = int(part)  # Possible `ValueError`
-                assert 0 <= part <= 255  # Outside byte range
-        except (AssertionError, ValueError):
-            return False
-
-        return True
