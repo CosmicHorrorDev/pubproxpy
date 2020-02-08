@@ -4,7 +4,7 @@ An easy to use Python wrapper for [pubproxy](http://pubproxy.com)'s public proxy
 
 ## Installation
 
-**NOTE:** The minimum python version for this library is 3.6, check with `python -V` or `python3 -V` if you're unsure about your current version.
+**NOTE:** The minimum python version for this library is 3.7, check with `python -V` or `python3 -V` if you're unsure about your current version.
 
 Install the [pubproxpy](https://pypi.org/project/pubproxpy/) package using your standard Python package manager e.g.
 

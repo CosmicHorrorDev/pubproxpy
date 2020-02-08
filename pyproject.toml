@@ -9,12 +9,12 @@ repository = "https://github.com/LovecraftianHorror/pubproxpy"
 keywords = ["proxy api", "pubproxy", "public proxy", "pubproxy api", "scraping"]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.7"
 requests = "^2.22"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
-flake8 = "^3.6"
+flake8 = "^3.7"
 pytest = "^3.0"
 
 [build-system]
