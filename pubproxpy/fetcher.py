@@ -10,7 +10,6 @@ import json
 import os
 from time import sleep
 from urllib.parse import urlencode
-from sys import exit
 
 from pubproxpy.errors import ProxyError, API_ERROR_MAP
 from pubproxpy.singleton import Singleton
