@@ -4,7 +4,7 @@ An easy to use Python wrapper for [pubproxy](http://pubproxy.com)'s public proxy
 
 ## Installation
 
-**NOTE:** The minimum python version for this library is 3.6, check with python -V or python3 -V if you're unsure about your current version.
+**NOTE:** The minimum python version for this library is 3.6, check with `python -V` or `python3 -V` if you're unsure about your current version.
 
 Install the [pubproxpy](https://pypi.org/project/pubproxpy/) package using your standard Python package manager e.g.
 
@@ -57,10 +57,10 @@ Since the API doesn't check pretty much anything for correctness, we do our best
 
 |Parameter|Type|Description|
 |:--|:--|:--|
-|`exclude_used`|`bool`|If the `ProxyFetcher` should prevent re-returning proxies|
-|`api_key`|`str`|API key for a paid account, you can also set `$PUBPROXY_API_KEY` to pass your key, passing the `api_key` parameter will override the env-var|
-|`level`|`str`|[_Options: anonymous, elite_] Proxy anonymity level|
-|`protocol`|`str`|[_Options: http, socks4, socks5_] Desired communication protocol|
+|`exclude_used`|`bool` |[_Default: `True`_] If the `ProxyFetcher` should prevent re-returning proxies|
+|`api_key`|`str`|API key for a paid account, you can also set `$PUBPROXY_API_KEY` to pass your key, passing the `api_key` parameter will override the env-var if both are present|
+|`level`|`str`|[_Options: `"anonymous"`, `"elite"`_] Proxy anonymity level|
+|`protocol`|`str`|[_Options: "`"http`, `"socks4"`, `"socks5"`_] Desired communication protocol|
 |`countries`|`str` or `list<str>`|Locations of the proxy using the [ISO-3166 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) country code, **Incompatible with `not_countries`**|
 |`not_countries`|`str` or `list<str>`|Blacklist locations of the proxy using the [ISO-3166 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) country code, **Incompatible with `countries`**|
 |`last_checked`|`int`|[_Bounds: 1-1000_] Minutes since the proxy was checked|
@@ -81,14 +81,15 @@ Keeping it simple (stupid), so just `get_proxy()` and `get_proxies(amount)`.
 |:--|:--|
 |`get_proxy()`|Single proxy as a string, format `{ip}:{port}`|
 |`get_proxies(amount)`|List of `amount` proxies, same format as above|
+|`drain()`|Returns any proxies remaining in the current list, useful if you are no longer getting proxies and want to save any left over|
 
 ### Exceptions
 
-All the exceptions are defined in `errors.py`.
+All the exceptions are defined in `pubproxy.errors`.
 
 |Exception|Description|
 |:--|:--|
-|`ProxyError`|Base exception that all other pubproxpy errors inherit from|
+|`ProxyError`|Base exception that all other pubproxpy errors inherit from, also raised when the API returns an unknown response|
 |`APIKeyError`|Error raised when the API gives an incorrect API Key response|
 |`RateLimitError`|Error raised when the API gives a rate-limiting response (more than 1 request per second)|
 |`DailyLimitError`|Error raised when the API gives the daily request limit response|
