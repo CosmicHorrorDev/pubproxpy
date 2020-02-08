@@ -170,6 +170,11 @@ class ProxyFetcher:
 
         return params
 
+    def drain(self):
+        """Returns any proxies remaining in the current list
+        """
+        return self.get_proxies(len(self._proxies))
+
     def get_proxy(self):
         """Attempts to get a single proxy matching the specified params
         """
