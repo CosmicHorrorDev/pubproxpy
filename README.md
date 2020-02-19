@@ -35,8 +35,9 @@ socks_pf = ProxyFetcher(protocol="socks5", countries=["US", "CA"], post=True)
 
 # ProxyFetcher for proxies that support https, are elite anonymity level,
 # and connected in 15 seconds or less
-http_pf = ProxyFetcher(protocol="http", https=True, level="elite",
-                       time_to_connect=15)
+https_pf = ProxyFetcher(
+    protocol="http", https=True, level="elite", time_to_connect=15
+)
 
 # Get one socks proxy, followed by 10 https proxies
 # NOTE: even though there are multiple `ProxyFetcher`s the delays are
