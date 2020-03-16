@@ -76,7 +76,7 @@ Since the API doesn't check pretty much anything for correctness, we do our best
 
 ### `ProxyFetcher` Methods
 
-Keeping it simple (stupid), so just `get_proxy()` and `get_proxies(amount)`.
+Keeping it simple (stupid), so just `get_proxy()`, `get_proxies(amount)`, and `drain()`.
 
 |Method|Returns|
 |:--|:--|
