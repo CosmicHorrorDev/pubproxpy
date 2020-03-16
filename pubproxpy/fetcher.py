@@ -219,7 +219,6 @@ class ProxyFetcher:
         try:
             data = json.loads(resp.text)["data"]
         except json.decoder.JSONDecodeError:
-            print(resp)
             raise API_ERROR_MAP.get(resp.text) or ProxyError(resp)
 
         # Get the returned list of proxies
