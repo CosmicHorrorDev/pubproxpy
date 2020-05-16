@@ -42,8 +42,12 @@ https_pf = ProxyFetcher(
 # Get one socks proxy, followed by 10 https proxies
 # NOTE: even though there are multiple `ProxyFetcher`s the delays are
 #       coordinated between them to prevent rate limiting
-socks_proxy = socks_pf.get_proxy()      # Returns a single proxy as a string
-https_proxy = https_pf.get_proxies(10)  # Returns a list of proxies as strings
+socks_proxy = socks_pf.get_proxy()        # Get a single proxy as a string
+https_proxies = https_pf.get_proxies(10)  # Get a list of proxies as strings
+
+# And then if you want to get any remaining proxies left over before you're
+# done you can!
+unused_proxies = socks_pf.drain()
 
 # Do something with the proxies, like spawn worker threads that use them
 ```
