@@ -8,6 +8,7 @@ import requests
 from datetime import datetime as dt
 import json
 import os
+import sys
 from time import sleep
 from urllib.parse import urlencode
 
@@ -178,12 +179,7 @@ class ProxyFetcher:
         """
         return self.get_proxies(len(self._proxies))
 
-    def get_proxy(self):
-        """Attempts to get a single proxy matching the specified params
-        """
-        return self.get_proxies(1)[0]
-
-    def get_proxies(self, amount):
+    def get(self, amount=1):
         """Attempts to get `amount` proxies matching the specified params
         """
         # Remove any blacklisted proxies from the internal list
@@ -209,6 +205,25 @@ class ProxyFetcher:
         print(f"{temp} {self._proxies}")
 
         return temp
+
+    def get_proxy(self):
+        """
+        !DEPRECATED!
+        Attempts to get a single proxy matching the specified params
+        """
+        return self.get_proxies(1)[0]
+
+    def get_proxies(self, amount):
+        """
+        !DEPRECATED!
+        Attempts to get `amount` proxies matching the specified params
+        """
+        print(
+            "DEPRECATED: this method is deprecated in favor of `.get(...)` and"
+            " will be removed in the next major version of the library (2.0)",
+            file=sys.stderr,
+        )
+        return self.get(amount)
 
     def _fetch(self):
         """Attempts to get the proxies from pubproxy.com, will `sleep` to
