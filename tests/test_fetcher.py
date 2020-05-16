@@ -36,19 +36,17 @@ def test_delay():
     with patch.object(requests, "get", return_value=MOCK_RESP):
         _ = pf1.get_proxy()
 
-    # Make sure there is a delay for the same one
-    start = dt.now()
-    pf1.drain()
-    with patch.object(requests, "get", return_value=MOCK_RESP):
+        # Make sure there is a delay for the same one
+        start = dt.now()
+        pf1.drain()
         _ = pf1.get_proxy()
-    assert (dt.now() - start).total_seconds() > 1.0
+        assert (dt.now() - start).total_seconds() > 1.0
 
-    # Even though it's a separate `ProxyFetcher` the delay should be
-    # coordinated
-    start = dt.now()
-    with patch.object(requests, "get", return_value=MOCK_RESP):
+        # Even though it's a separate `ProxyFetcher` the delay should be
+        # coordinated
+        start = dt.now()
         _ = pf2.get_proxy()
-    assert (dt.now() - start).total_seconds() > 1.0
+        assert (dt.now() - start).total_seconds() > 1.0
 
 
 @pytest.mark.skip(reason="unimplemented")
