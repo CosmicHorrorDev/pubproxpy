@@ -206,8 +206,6 @@ class ProxyFetcher:
         if self._exclude_used:
             self._shared.used |= set(temp)
 
-        print(f"{temp} {self._proxies}")
-
         return temp
 
     def _fetch(self):
