@@ -82,16 +82,16 @@ def test_params():
     }
 
     # Check that going out of bounds is a no no
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError):
         _ = ProxyFetcher(last_checked=0)
 
     # Same with choosing an incorrect option
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError):
         # Fat-fingered
         _ = ProxyFetcher(level="eilte")
 
     # `countries` and `not_countries` are incompatilbe
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError):
         _ = ProxyFetcher(countries="US", not_countries=["CA", "NK"])
 
     # And now it's time to check everything

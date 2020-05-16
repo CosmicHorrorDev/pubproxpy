@@ -126,7 +126,7 @@ class ProxyFetcher:
                 if val not in opts:
                     raise ValueError(
                         f'invalid value "{val}" for "{param}" options are'
-                        f' {opts}'
+                        f" {opts}"
                     )
 
             if param in self._PARAM_BOUNDS:
