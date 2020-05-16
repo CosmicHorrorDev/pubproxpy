@@ -7,6 +7,7 @@ import os
 from unittest.mock import patch
 
 from pubproxpy import ProxyFetcher
+from pubproxpy.fetcher import _FetcherShared
 
 
 class _mock_resp:
@@ -20,7 +21,15 @@ MOCK_RESP = _mock_resp(
 )
 
 
+def _cleanup():
+    # Cleanup up the shared junk from the `Singleton` (also note that this is
+    # one of the pains of using a singleton)
+    _FetcherShared().reset()
+
+
 def test_delay():
+    _cleanup()
+
     # Remove api key for test if it exists
     if "PUBPROXY_API_KEY" in os.environ:
         del os.environ["PUBPROXY_API_KEY"]
@@ -56,6 +65,8 @@ def test_delay():
 
 
 def test_params():
+    _cleanup()
+
     # Test base params
     if "PUBPROXY_API_KEY" in os.environ:
         del os.environ["PUBPROXY_API_KEY"]
@@ -118,11 +129,9 @@ def test_params():
     assert ProxyFetcher(**before_params)._params == after_params
 
 
-# FIXME: look at the reason vv
-@pytest.mark.skip(
-    reason="Should work, but the libary checks for duplicates too early"
-)
 def test_blacklist():
+    _cleanup()
+
     pf1 = ProxyFetcher()
     pf2 = ProxyFetcher()
 
@@ -140,6 +149,8 @@ def test_blacklist():
 
 
 def test_methods():
+    _cleanup()
+
     pf = ProxyFetcher()
 
     with patch.object(requests, "get", return_value=MOCK_RESP):

@@ -26,6 +26,9 @@ class _FetcherShared(metaclass=Singleton):
         self.last_requested = None
         self.used = set()
 
+    def reset(self):
+        self.__init__()
+
 
 # TODO: set up tests for things
 # TODO: move all the constants for ProxyFetcher outside of the class?
