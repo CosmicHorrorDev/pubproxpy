@@ -107,29 +107,35 @@ class ProxyFetcher:
         """
 
         # `countries` and `not_countries` are mutually exclusive
-        assert "countries" not in params or "not_countries" not in params, (
-            "incompatible parameters, `countries` and `not_countries` are"
-            " mutually exclusive"
-        )
+        if "countries" in params and "not_countries" in params:
+            raise ValueError(
+                "incompatible parameters, `countries` and `not_countries` are"
+                " mutually exclusive"
+            )
 
         # Verify all params are valid, and satisfy the valid bounds or options
         for param, val in params.items():
-            assert param in self._PARAMS, (
-                f'invalid parameter "{param}" valid parameters are'
-                f" {[p for p in self._PARAMS]}"
-            )
+            if param not in self._PARAMS:
+                raise ValueError(
+                    f'unrecognized parameter "{param}" valid parameters are'
+                    f" {[p for p in self._PARAMS]}"
+                )
 
             if param in self._PARAM_OPTS:
                 opts = self._PARAM_OPTS[param]
-                assert (
-                    val in opts
-                ), f'invalid value "{val}" for "{param}" options are {opts}'
+                if val not in opts:
+                    raise ValueError(
+                        f'invalid value "{val}" for "{param}" options are'
+                        f' {opts}'
+                    )
 
             if param in self._PARAM_BOUNDS:
                 low, high = self._PARAM_BOUNDS[param]
-                assert (
-                    low <= val <= high
-                ), f'value "{val}" for "{param}" out of bounds ({low}, {high})'
+                if val < low or val > high:
+                    raise ValueError(
+                        f'value "{val}" for "{param}" out of bounds'
+                        f" ({low} to {high})"
+                    )
 
     def _rename_params(self, params):
         """Method to rename some params from the API's method to pubproxy's
