@@ -9,7 +9,6 @@ from unittest.mock import patch
 from pubproxpy import ProxyFetcher
 
 
-# FIXME: actually mock the request itself
 class _mock_resp:
     def __init__(self, text):
         self.text = text
@@ -71,9 +70,61 @@ def test_params():
         del os.environ["PUBPROXY_API_KEY"]
     assert ProxyFetcher()._params == {"limit": 5, "format": "json"}
 
-    # Test picking up api key from env var
+    # Test premium params from API key
     os.environ["PUBPROXY_API_KEY"] = "<key>"
-    pf = ProxyFetcher()
+    assert ProxyFetcher()._params == {
+        "limit": 20,
+        "format": "json",
+        "api": "<key>",
+    }
+
+    # Check that going out of bounds is a no no
+    with pytest.raises(AssertionError):
+        _ = ProxyFetcher(last_checked=0)
+
+    # Same with choosing an incorrect option
+    with pytest.raises(AssertionError):
+        # Fat-fingered
+        _ = ProxyFetcher(level="eilte")
+
+    # `countries` and `not_countries` are incompatilbe
+    with pytest.raises(AssertionError):
+        _ = ProxyFetcher(countries="US", not_countries=["CA", "NK"])
+
+    # And now it's time to check everything
+    before_params = {
+        "api_key": "<other key>",
+        "level": "elite",
+        "protocol": "http",
+        "countries": "CA",
+        "last_checked": 1,
+        "port": 1234,
+        "time_to_connect": 2,
+        "cookies": True,
+        "google": False,
+        "https": True,
+        "post": False,
+        "referer": True,
+        "user_agent": False,
+    }
+    after_params = {
+        "api": "<other key>",
+        "level": "elite",
+        "type": "http",
+        "country": "CA",
+        "last_check": 1,
+        "port": 1234,
+        "speed": 2,
+        "cookies": True,
+        "google": False,
+        "https": True,
+        "post": False,
+        "referer": True,
+        "user_agent": False,
+        "format": "json",
+        "limit": 20,
+    }
+    assert ProxyFetcher(**before_params)._params == after_params
 
 
 @pytest.mark.skip(reason="unimplemented")
