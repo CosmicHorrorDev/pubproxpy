@@ -14,18 +14,9 @@ class _mock_resp:
         self.text = text
 
 
+PROXIES = [f"{i}.{i}.{i}.{i}:1234" for i in range(5)]
 MOCK_RESP = _mock_resp(
-    json.dumps(
-        {
-            "data": [
-                {"ipPort": "0.0.0.0:0000"},
-                {"ipPort": "1.1.1.1:1111"},
-                {"ipPort": "2.2.2.2:2222"},
-                {"ipPort": "3.3.3.3:33333"},
-                {"ipPort": "4.4.4.4:4444"},
-            ]
-        }
-    )
+    json.dumps({"data": [{"ipPort": proxy} for proxy in PROXIES]})
 )
 
 
@@ -127,9 +118,25 @@ def test_params():
     assert ProxyFetcher(**before_params)._params == after_params
 
 
-@pytest.mark.skip(reason="unimplemented")
+# FIXME: look at the reason vv
+@pytest.mark.skip(
+    reason="Should work, but the libary checks for duplicates too early"
+)
 def test_blacklist():
-    pass
+    pf1 = ProxyFetcher()
+    pf2 = ProxyFetcher()
+
+    with patch.object(requests, "get", return_value=MOCK_RESP):
+        # So becuase the blacklist is coordinated between the `ProxyFetcher`s
+        # even though `pf1` and `pf2` will get the same proxies, they should
+        # only return a single unique list between the both of them
+        assert {
+            pf1.get_proxy(),
+            pf2.get_proxy(),
+            pf1.get_proxy(),
+            pf2.get_proxy(),
+            pf1.get_proxy(),
+        } == set(PROXIES)
 
 
 @pytest.mark.skip(reason="unimplemented")
