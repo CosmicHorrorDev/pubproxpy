@@ -14,6 +14,9 @@ class _mock_resp:
     def __init__(self, text):
         self.text = text
 
+    def raise_for_status(self):
+        pass
+
 
 PROXIES = [f"{i}.{i}.{i}.{i}:1234" for i in range(5)]
 MOCK_RESP = _mock_resp(
