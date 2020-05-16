@@ -202,8 +202,6 @@ class ProxyFetcher:
         if self._exclude_used:
             self._shared.used |= set(temp)
 
-        print(f"{temp} {self._proxies}")
-
         return temp
 
     def get_proxy(self):
@@ -241,6 +239,8 @@ class ProxyFetcher:
 
         # Query the api
         resp = requests.get(self._query)
+        # And ensure the response is ok
+        resp.raise_for_status()
 
         try:
             data = json.loads(resp.text)["data"]
