@@ -1,4 +1,4 @@
-name: Python package
+name: Check Styling, Formatting, and Tests
 
 # Trigger workflow on push or pull_request
 on: [push, pull_request]
@@ -6,10 +6,10 @@ on: [push, pull_request]
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}-latest
     strategy:
-      max-parallel: 4
       matrix:
+        os: [Ubuntu, MacOS, Windows]
         python-version: [3.7, 3.8]
 
     steps:
