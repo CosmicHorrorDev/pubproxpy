@@ -181,12 +181,18 @@ class ProxyFetcher:
     def get_proxy(self):
         """Attempts to get a single proxy matching the specified params
         """
-
         return self.get_proxies(1)[0]
 
     def get_proxies(self, amount):
         """Attempts to get `amount` proxies matching the specified params
         """
+        # Remove any blacklisted proxies from the internal list
+        # Note: this needs to be done since reused proxies can sit in the
+        #       internal list of separate `ProxyFetcher`s
+        if self._exclude_used:
+            self._proxies = [
+                p for p in self._proxies if p not in self._shared.used
+            ]
 
         # Get enough proxies to satisfy `amount`
         while len(self._proxies) < amount:
@@ -199,6 +205,8 @@ class ProxyFetcher:
         # Add the proxies to the blacklist if `_exclude_used`
         if self._exclude_used:
             self._shared.used |= set(temp)
+
+        print(f"{temp} {self._proxies}")
 
         return temp
 
