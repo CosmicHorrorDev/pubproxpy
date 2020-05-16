@@ -50,7 +50,7 @@ https_proxy = https_pf.get_proxies(10)  # Returns a list of proxies as strings
 
 ## Documentation
 
-Getting proxies is handled by the `ProxyFetcher` class. There are several parameters you can pass on initialization to narrow down the proxies to a suitable type. From there you can just call `get_proxy` to receive a proxy in the form of `{ip-address}:{port-number}` or call `get_proxies(amount)` to receive a list of `amount` proxies. There is an internal blacklist to ensure that the same proxy ip and port combo will not be used more than once by any `ProxyFetcher`, unless `exclude_used` is `False`.
+Getting proxies is handled by the `ProxyFetcher` class. There are several parameters you can pass on initialization to narrow down the proxies to a suitable type. From there you can just call `get_proxy` to receive a proxy in the form of `{ip-address}:{port-number}` or call `get_proxies(amount)` to receive a list of `amount` proxies. There is an internal blacklist to ensure that the same proxy IP and port combo will not be used more than once by any `ProxyFetcher`, unless `exclude_used` is `False`.
 
 ### `ProxyFetcher` Parameters
 
@@ -61,7 +61,7 @@ Since the API doesn't check pretty much anything for correctness, we do our best
 |`exclude_used`|`bool` |[_Default: `True`_] If the `ProxyFetcher` should prevent re-returning proxies|
 |`api_key`|`str`|API key for a paid account, you can also set `$PUBPROXY_API_KEY` to pass your key, passing the `api_key` parameter will override the env-var if both are present|
 |`level`|`str`|[_Options: `"anonymous"`, `"elite"`_] Proxy anonymity level|
-|`protocol`|`str`|[_Options: "`"http`, `"socks4"`, `"socks5"`_] Desired communication protocol|
+|`protocol`|`str`|[_Options: `"http"`, `"socks4"`, `"socks5"`_] Desired communication protocol|
 |`countries`|`str` or `list<str>`|Locations of the proxy using the [ISO-3166 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) country code, **Incompatible with `not_countries`**|
 |`not_countries`|`str` or `list<str>`|Blacklist locations of the proxy using the [ISO-3166 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) country code, **Incompatible with `countries`**|
 |`last_checked`|`int`|[_Bounds: 1-1000_] Minutes since the proxy was checked|
@@ -86,7 +86,7 @@ Keeping it simple (stupid), so just `get_proxy()`, `get_proxies(amount)`, and `d
 
 ### Exceptions
 
-All the exceptions are defined in `pubproxy.errors`.
+All the exceptions are defined in `pubproxpy.errors`.
 
 |Exception|Description|
 |:--|:--|
