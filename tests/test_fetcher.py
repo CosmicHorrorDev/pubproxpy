@@ -139,6 +139,17 @@ def test_blacklist():
         } == set(PROXIES)
 
 
-@pytest.mark.skip(reason="unimplemented")
 def test_methods():
-    pass
+    pf = ProxyFetcher()
+
+    with patch.object(requests, "get", return_value=MOCK_RESP):
+        single = pf.get_proxy()
+        assert type(single) == str
+
+        double = pf.get_proxies(2)
+        assert len(double) == 2
+
+        the_rest = pf.drain()
+        assert len(the_rest) == len(PROXIES) - 1 - 2
+
+        assert set([single, *double, *the_rest]) == set(PROXIES)
