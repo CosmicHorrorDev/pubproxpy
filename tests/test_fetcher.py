@@ -3,6 +3,7 @@ import requests
 
 from datetime import datetime as dt
 import json
+import os
 from unittest.mock import patch
 
 from pubproxpy import ProxyFetcher
@@ -30,8 +31,16 @@ MOCK_RESP = _mock_resp(
 
 
 def test_delay():
+    # Remove api key for test if it exists
+    if "PUBPROXY_API_KEY" in os.environ:
+        del os.environ["PUBPROXY_API_KEY"]
+
     pf1 = ProxyFetcher(exclude_used=False)
     pf2 = ProxyFetcher(exclude_used=False)
+
+    # And a premium `ProxyFetcher` that has an API key
+    os.environ["PUBPROXY_API_KEY"] = "<key>"
+    premium_pf = ProxyFetcher(exclude_used=False)
 
     with patch.object(requests, "get", return_value=MOCK_RESP):
         _ = pf1.get_proxy()
@@ -42,6 +51,13 @@ def test_delay():
         _ = pf1.get_proxy()
         assert (dt.now() - start).total_seconds() > 1.0
 
+        # Even in the middle of other `ProxyFetcher`s getting rate limited the
+        # premium one should have no delay
+        start = dt.now()
+        premium_pf.drain()
+        _ = premium_pf.get_proxy()
+        assert (dt.now() - start).total_seconds() < 0.1
+
         # Even though it's a separate `ProxyFetcher` the delay should be
         # coordinated
         start = dt.now()
@@ -49,9 +65,15 @@ def test_delay():
         assert (dt.now() - start).total_seconds() > 1.0
 
 
-@pytest.mark.skip(reason="unimplemented")
 def test_params():
-    pass
+    # Test base params
+    if "PUBPROXY_API_KEY" in os.environ:
+        del os.environ["PUBPROXY_API_KEY"]
+    assert ProxyFetcher()._params == {"limit": 5, "format": "json"}
+
+    # Test picking up api key from env var
+    os.environ["PUBPROXY_API_KEY"] = "<key>"
+    pf = ProxyFetcher()
 
 
 @pytest.mark.skip(reason="unimplemented")
