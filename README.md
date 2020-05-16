@@ -42,8 +42,8 @@ https_pf = ProxyFetcher(
 # Get one socks proxy, followed by 10 https proxies
 # NOTE: even though there are multiple `ProxyFetcher`s the delays are
 #       coordinated between them to prevent rate limiting
-socks_proxy = socks_pf.get_proxy()        # Get a single proxy as a string
-https_proxies = https_pf.get_proxies(10)  # Get a list of proxies as strings
+socks_proxy = socks_pf.get()[0]   # Get a single socks proxy
+https_proxies = https_pf.get(10)  # Get a 10 https proxies
 
 # And then if you want to get any remaining proxies left over before you're
 # done you can!
@@ -54,7 +54,7 @@ unused_proxies = socks_pf.drain()
 
 ## Documentation
 
-Getting proxies is handled by the `ProxyFetcher` class. There are several parameters you can pass on initialization to narrow down the proxies to a suitable type. From there you can just call `get_proxy` to receive a proxy in the form of `{ip-address}:{port-number}` or call `get_proxies(amount)` to receive a list of `amount` proxies. There is an internal blacklist to ensure that the same proxy IP and port combo will not be used more than once by any `ProxyFetcher`, unless `exclude_used` is `False`.
+Getting proxies is handled by the `ProxyFetcher` class. There are several parameters you can pass on initialization to narrow down the proxies to a suitable type. From there you can just call `.get(amount=1)` to receive a list of `amount` proxies where each proxy is in the form of `"{ip}:{port}"`. There is an internal blacklist to ensure that the same proxy IP and port combo will not be used more than once by any `ProxyFetcher`, unless `exclude_used` is `False`.
 
 ### `ProxyFetcher` Parameters
 
@@ -80,13 +80,12 @@ Since the API doesn't check pretty much anything for correctness, we do our best
 
 ### `ProxyFetcher` Methods
 
-Keeping it simple (stupid), so just `get_proxy()`, `get_proxies(amount)`, and `drain()`.
+Keeping it simple (stupid), so just `.get(amount=1)` and `.drain()`.
 
 |Method|Returns|
 |:--|:--|
-|`get_proxy()`|Single proxy as a string, format `{ip}:{port}`|
-|`get_proxies(amount)`|List of `amount` proxies, same format as above|
-|`drain()`|Returns any proxies remaining in the current list, useful if you are no longer getting proxies and want to save any left over|
+|`.get(amount=1)`|List of `amount` proxies, where each proxy is a `str` in the form `"{ip}:{port}"`|
+|`.drain()`|Returns any proxies remaining in the current list, useful if you are no longer getting proxies and want to save any left over|
 
 ### Exceptions
 
