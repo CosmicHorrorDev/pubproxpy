@@ -42,25 +42,25 @@ def test_delay():
     premium_pf = ProxyFetcher(exclude_used=False)
 
     with patch.object(requests, "get", return_value=MOCK_RESP):
-        _ = pf1.get_proxy()
+        _ = pf1.get()
 
         # Make sure there is a delay for the same one
         start = dt.now()
         pf1.drain()
-        _ = pf1.get_proxy()
+        _ = pf1.get()
         assert (dt.now() - start).total_seconds() > 1.0
 
         # Even in the middle of other `ProxyFetcher`s getting rate limited the
         # premium one should have no delay
         start = dt.now()
         premium_pf.drain()
-        _ = premium_pf.get_proxy()
+        _ = premium_pf.get()
         assert (dt.now() - start).total_seconds() < 0.1
 
         # Even though it's a separate `ProxyFetcher` the delay should be
         # coordinated
         start = dt.now()
-        _ = pf2.get_proxy()
+        _ = pf2.get()
         assert (dt.now() - start).total_seconds() > 1.0
 
 
@@ -136,11 +136,11 @@ def test_blacklist():
         # even though `pf1` and `pf2` will get the same proxies, they should
         # only return a single unique list between the both of them
         assert {
-            pf1.get_proxy(),
-            pf2.get_proxy(),
-            pf1.get_proxy(),
-            pf2.get_proxy(),
-            pf1.get_proxy(),
+            *pf1.get(),
+            *pf2.get(),
+            *pf1.get(),
+            *pf2.get(),
+            *pf1.get(),
         } == set(PROXIES)
 
 
@@ -148,13 +148,13 @@ def test_methods():
     pf = ProxyFetcher()
 
     with patch.object(requests, "get", return_value=MOCK_RESP):
-        single = pf.get_proxy()
-        assert type(single) == str
+        single = pf.get()
+        assert len(single) == 1
 
-        double = pf.get_proxies(2)
+        double = pf.get(2)
         assert len(double) == 2
 
         the_rest = pf.drain()
-        assert len(the_rest) == len(PROXIES) - 1 - 2
+        assert len(the_rest) == len(PROXIES) - len(single) - len(double)
 
-        assert set([single, *double, *the_rest]) == set(PROXIES)
+        assert {*single, *double, *the_rest} == set(PROXIES)
