@@ -6,7 +6,7 @@ import json
 import os
 from unittest.mock import patch
 
-from pubproxpy import ProxyFetcher
+from pubproxpy import Level, Protocol, ProxyFetcher
 from pubproxpy.fetcher import _FetcherShared
 
 
@@ -94,11 +94,15 @@ def test_params():
     with pytest.raises(ValueError):
         _ = ProxyFetcher(countries="US", not_countries=["CA", "NK"])
 
+    # Switched from strings to `Enum`s when possible
+    with pytest.raises(ValueError):
+        _ = ProxyFetcher(protocol="http")
+
     # And now it's time to check everything
     before_params = {
         "api_key": "<other key>",
-        "level": "elite",
-        "protocol": "http",
+        "level": Level.ELITE,
+        "protocol": Protocol.HTTP,
         "countries": "CA",
         "last_checked": 1,
         "port": 1234,

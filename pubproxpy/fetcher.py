@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-# TODO: check for error with using a proxy to get proxies
-# TODO: `rg` to find any other todos before release
-# TODO: strongly type parameters
-
 import requests
 
 from datetime import datetime as dt
@@ -13,6 +8,7 @@ from urllib.parse import urlencode
 
 from pubproxpy._singleton import Singleton
 from pubproxpy.errors import ProxyError, API_ERROR_MAP
+from pubproxpy.types import Level, Protocol
 
 
 class _FetcherShared(metaclass=Singleton):
@@ -30,9 +26,6 @@ class _FetcherShared(metaclass=Singleton):
         self.__init__()
 
 
-# TODO: set up tests for things
-# TODO: move all the constants for ProxyFetcher outside of the class?
-#       to constants file maybe?
 class ProxyFetcher:
     """Class used to fetch proxies from the pubproxy API matching the provided
     parameters
@@ -57,12 +50,6 @@ class ProxyFetcher:
         "referer",
         "user_agent",
     )
-
-    # Parameters that have explicit options
-    _PARAM_OPTS = {
-        "level": ("anonymous", "elite"),
-        "protocol": ("http", "socks4", "socks5"),
-    }
 
     # Parameters that are bounded
     _PARAM_BOUNDS = {"last_checked": (1, 1000), "time_to_connect": (1, 60)}
@@ -112,6 +99,16 @@ class ProxyFetcher:
                 " mutually exclusive"
             )
 
+        # Check that protocol and level are the correct type
+        for key, enum_type in (("protocol", Protocol), ("level", Level)):
+            if key in params:
+                val = params[key]
+                if not isinstance(val, enum_type):
+                    raise ValueError(
+                        f"{key} should be of type `{enum_type}` not "
+                        f" `{type(val)}`"
+                    )
+
         # Verify all params are valid, and satisfy the valid bounds or options
         for param, val in params.items():
             if param not in self._PARAMS:
@@ -119,14 +116,6 @@ class ProxyFetcher:
                     f'unrecognized parameter "{param}" valid parameters are'
                     f" {[p for p in self._PARAMS]}"
                 )
-
-            if param in self._PARAM_OPTS:
-                opts = self._PARAM_OPTS[param]
-                if val not in opts:
-                    raise ValueError(
-                        f'invalid value "{val}" for "{param}" options are'
-                        f" {opts}"
-                    )
 
             if param in self._PARAM_BOUNDS:
                 low, high = self._PARAM_BOUNDS[param]
@@ -176,6 +165,11 @@ class ProxyFetcher:
         elif "not_country" in params:
             if isinstance(params["not_country"], (list, tuple)):
                 params["not_country"] = ",".join(params["not_country"])
+
+        # Get value from enums
+        for key in ("level", "type"):
+            if key in params:
+                params[key] = params[key].value
 
         return params
 
