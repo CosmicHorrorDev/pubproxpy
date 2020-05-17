@@ -8,7 +8,6 @@ import requests
 from datetime import datetime as dt
 import json
 import os
-import sys
 from time import sleep
 from urllib.parse import urlencode
 
@@ -183,7 +182,7 @@ class ProxyFetcher:
     def drain(self):
         """Returns any proxies remaining in the current list
         """
-        return self.get_proxies(len(self._proxies))
+        return self.get(len(self._proxies))
 
     def get(self, amount=1):
         """Attempts to get `amount` proxies matching the specified params
@@ -209,25 +208,6 @@ class ProxyFetcher:
             self._shared.used |= set(temp)
 
         return temp
-
-    def get_proxy(self):
-        """
-        !DEPRECATED!
-        Attempts to get a single proxy matching the specified params
-        """
-        return self.get_proxies(1)[0]
-
-    def get_proxies(self, amount):
-        """
-        !DEPRECATED!
-        Attempts to get `amount` proxies matching the specified params
-        """
-        print(
-            "DEPRECATED: this method is deprecated in favor of `.get(...)` and"
-            " will be removed in the next major version of the library (2.0)",
-            file=sys.stderr,
-        )
-        return self.get(amount)
 
     def _fetch(self):
         """Attempts to get the proxies from pubproxy.com, will `sleep` to
