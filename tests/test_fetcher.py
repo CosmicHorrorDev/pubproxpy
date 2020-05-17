@@ -26,17 +26,18 @@ MOCK_RESP = _mock_resp(
 
 @pytest.fixture(autouse=True)
 def _cleanup():
-    yield
+    # Remove any possibly preexisting key
+    if "PUBPROXY_API_KEY" in os.environ:
+        del os.environ["PUBPROXY_API_KEY"]
+
+    yield  # <-- The test runs here
+
     # Cleanup up the shared junk from the `Singleton` (also note that this is
     # one of the pains of using a singleton)
     _FetcherShared().reset()
 
 
 def test_delay():
-    # Remove api key for test if it exists
-    if "PUBPROXY_API_KEY" in os.environ:
-        del os.environ["PUBPROXY_API_KEY"]
-
     pf1 = ProxyFetcher(exclude_used=False)
     pf2 = ProxyFetcher(exclude_used=False)
 
@@ -68,9 +69,6 @@ def test_delay():
 
 
 def test_params():
-    # Test base params
-    if "PUBPROXY_API_KEY" in os.environ:
-        del os.environ["PUBPROXY_API_KEY"]
     assert ProxyFetcher()._params == {"limit": 5, "format": "json"}
 
     # Test premium params from API key
