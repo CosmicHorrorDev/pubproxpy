@@ -1,14 +1,14 @@
-import requests
-
-from datetime import datetime as dt
 import json
 import os
+from datetime import datetime as dt
 from time import sleep
+from typing import Dict, List, Optional, Set, Tuple, Union, cast
 from urllib.parse import urlencode
 
+import requests
 from pubproxpy._singleton import Singleton
-from pubproxpy.errors import ProxyError, API_ERROR_MAP
-from pubproxpy.types import Level, Protocol
+from pubproxpy.errors import API_ERROR_MAP, ProxyError
+from pubproxpy.types import Level, Protocol, ParamTypes, Params, Proxy
 
 
 class _FetcherShared(metaclass=Singleton):
@@ -18,12 +18,15 @@ class _FetcherShared(metaclass=Singleton):
     NOTE: This does not synchronize between threads
     """
 
-    def __init__(self):
+    last_requested: Optional[dt]
+    used: Set[str]
+
+    def __init__(self) -> None:
+        self.reset()
+
+    def reset(self) -> None:
         self.last_requested = None
         self.used = set()
-
-    def reset(self):
-        self.__init__()
 
 
 class ProxyFetcher:
@@ -31,10 +34,16 @@ class ProxyFetcher:
     parameters
     """
 
-    _BASE_URI = "http://pubproxy.com/api/proxy?"
+    _exclude_used: bool
+    _params: Params
+    _proxies: List[Proxy]
+    _query: str
+    _shared: _FetcherShared
+
+    _BASE_URI: str = "http://pubproxy.com/api/proxy?"
 
     # Parameters used by `ProxyFetcher` for the pubproxy api
-    _PARAMS = (
+    _PARAMS: Tuple[str, ...] = (
         "api_key",
         "level",
         "protocol",
@@ -52,14 +61,19 @@ class ProxyFetcher:
     )
 
     # Parameters that are bounded
-    _PARAM_BOUNDS = {"last_checked": (1, 1000), "time_to_connect": (1, 60)}
+    _PARAM_BOUNDS: Dict[str, Tuple[int, int]] = {
+        "last_checked": (1, 1000),
+        "time_to_connect": (1, 60),
+    }
 
     # Request delay for keyless request limiting in seconds
     # Note: Requests are supposed to be limited to 1 per second, but 1.0 and
     #       1.01 sometimes still triggers the rate limit so 1.05 was picked
-    _REQUEST_DELAY = 1.05
+    _REQUEST_DELAY: float = 1.05
 
-    def __init__(self, *, exclude_used=True, **params):
+    def __init__(
+        self, *, exclude_used: bool = True, **params: ParamTypes
+    ) -> None:
         self._exclude_used = exclude_used
 
         # Setup `_params` and `_query`
@@ -73,7 +87,7 @@ class ProxyFetcher:
         # list (used list only used if `exclude_used` is `True`)
         self._shared = _FetcherShared()
 
-    def _setup_params(self, params):
+    def _setup_params(self, params: Params) -> Params:
         """Checks all of the params and renames to acutally work with the API
         """
 
@@ -86,7 +100,7 @@ class ProxyFetcher:
         params = self._rename_params(params)
         return self._format_params(params)
 
-    def _verify_params(self, params):
+    def _verify_params(self, params: Params) -> None:
         """Since the API really lets anything go, check to make sure params are
         compatible with each other, within the bounds, and are one of the
         accepted options
@@ -118,6 +132,7 @@ class ProxyFetcher:
                 )
 
             if param in self._PARAM_BOUNDS:
+                val = cast(int, val)
                 low, high = self._PARAM_BOUNDS[param]
                 if val < low or val > high:
                     raise ValueError(
@@ -125,7 +140,7 @@ class ProxyFetcher:
                         f" ({low} to {high})"
                     )
 
-    def _rename_params(self, params):
+    def _rename_params(self, params: Params) -> Params:
         """Method to rename some params from the API's method to pubproxy's
         since some of the API's names are confusing / unclear
         """
@@ -146,7 +161,7 @@ class ProxyFetcher:
 
         return params
 
-    def _format_params(self, params):
+    def _format_params(self, params: Params) -> Params:
         """Set any of the always used params and make sure everything is
         `urlencode`able
         """
@@ -169,18 +184,17 @@ class ProxyFetcher:
         # Get value from enums
         for key in ("level", "type"):
             if key in params:
-                params[key] = params[key].value
+                enum_param = cast(Union[Level, Protocol], params[key])
+                params[key] = enum_param.value
 
         return params
 
-    def drain(self):
-        """Returns any proxies remaining in the current list
-        """
+    def drain(self) -> List[Proxy]:
+        """Returns any proxies remaining in the current list"""
         return self.get(len(self._proxies))
 
-    def get(self, amount=1):
-        """Attempts to get `amount` proxies matching the specified params
-        """
+    def get(self, amount: int = 1) -> List[Proxy]:
+        """Attempts to get `amount` proxies matching the specified params"""
         # Remove any blacklisted proxies from the internal list
         # Note: this needs to be done since reused proxies can sit in the
         #       internal list of separate `ProxyFetcher`s
@@ -193,7 +207,7 @@ class ProxyFetcher:
         while len(self._proxies) < amount:
             self._proxies += self._fetch()
 
-        # Store the deisred proxies in `temp` and remove from `self._proxies`
+        # Store the desired proxies in `temp` and remove from `self._proxies`
         temp = self._proxies[:amount]
         self._proxies = self._proxies[amount:]
 
@@ -203,7 +217,7 @@ class ProxyFetcher:
 
         return temp
 
-    def _fetch(self):
+    def _fetch(self) -> Set[Proxy]:
         """Attempts to get the proxies from pubproxy.com, will `sleep` to
         prevent getting rate-limited
         """

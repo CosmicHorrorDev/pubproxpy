@@ -1,3 +1,7 @@
+from typing import Optional
+
+from requests import Response
+
 _REPO_URL = "https://github.com/LovecraftianHorror/pubproxpy"
 
 INVALID_API_RESP = (
@@ -35,10 +39,11 @@ _NO_PROXY_ERROR_MESSAGE = (
 
 
 class ProxyError(Exception):
-    """Generic base error
-    """
+    """Generic base error"""
 
-    def __init__(self, response, message=_PROXY_ERROR_MESSAGE):
+    def __init__(
+        self, response: Optional[Response], message: str = _PROXY_ERROR_MESSAGE
+    ) -> None:
         if response is None:
             super().__init__(message)
         else:
@@ -46,34 +51,30 @@ class ProxyError(Exception):
 
 
 class APIKeyError(ProxyError):
-    """Error for incorrect API key response
-    """
+    """Error for incorrect API key response"""
 
-    def __init__(self, message=_API_KEY_ERROR_MESSAGE):
+    def __init__(self, message: str = _API_KEY_ERROR_MESSAGE) -> None:
         super().__init__(None, message)
 
 
 class RateLimitError(ProxyError):
-    """Error for rate limiting response
-    """
+    """Error for rate limiting response"""
 
-    def __init__(self, message=_RATE_LIMIT_ERROR_MESSAGE):
+    def __init__(self, message: str = _RATE_LIMIT_ERROR_MESSAGE) -> None:
         super().__init__(None, message)
 
 
 class DailyLimitError(ProxyError):
-    """Error for hitting the daily request limit
-    """
+    """Error for hitting the daily request limit"""
 
-    def __init__(self, message=_DAILY_LIMIT_ERROR_MESSAGE):
+    def __init__(self, message: str = _DAILY_LIMIT_ERROR_MESSAGE) -> None:
         super().__init__(None, message)
 
 
 class NoProxyError(ProxyError):
-    """Error for getting the "No Proxy" response
-    """
+    """Error for getting the "No Proxy" response"""
 
-    def __init__(self, message=_NO_PROXY_ERROR_MESSAGE):
+    def __init__(self, message: str = _NO_PROXY_ERROR_MESSAGE) -> None:
         super().__init__(None, message)
 
 
