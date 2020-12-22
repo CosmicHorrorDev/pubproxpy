@@ -12,9 +12,9 @@ from pubproxpy.types import Level, Protocol, ParamTypes, Params, Proxy
 
 
 class _FetcherShared(metaclass=Singleton):
-    """This class is used solely for the purpose of synchronizing request times
-    and used lists between different `ProxyFetcher`s to prevent rate limiting
-    and reusing old proxies.
+    """This class is used solely for the purpose of synchronizing request times and used
+    lists between different `ProxyFetcher`s to prevent rate limiting and reusing old
+    proxies.
     NOTE: This does not synchronize between threads
     """
 
@@ -67,13 +67,11 @@ class ProxyFetcher:
     }
 
     # Request delay for keyless request limiting in seconds
-    # Note: Requests are supposed to be limited to 1 per second, but 1.0 and
-    #       1.01 sometimes still triggers the rate limit so 1.05 was picked
+    # Note: Requests are supposed to be limited to 1 per second, but 1.0 and 1.01
+    #       sometimes still triggers the rate limit so 1.05 was picked
     _REQUEST_DELAY: float = 1.05
 
-    def __init__(
-        self, *, exclude_used: bool = True, **params: ParamTypes
-    ) -> None:
+    def __init__(self, *, exclude_used: bool = True, **params: ParamTypes) -> None:
         self._exclude_used = exclude_used
 
         # Setup `_params` and `_query`
@@ -83,8 +81,8 @@ class ProxyFetcher:
         # List of unused proxies to give
         self._proxies = []
 
-        # Shared data between `ProxyFetcher`s, includes request time and used
-        # list (used list only used if `exclude_used` is `True`)
+        # Shared data between `ProxyFetcher`s, includes request time and used list
+        # (used list only used if `exclude_used` is `True`)
         self._shared = _FetcherShared()
 
     def _setup_params(self, params: Params) -> Params:
@@ -101,8 +99,8 @@ class ProxyFetcher:
 
     def _verify_params(self, params: Params) -> None:
         """Since the API really lets anything go, check to make sure params are
-        compatible with each other, within the bounds, and are one of the
-        accepted options
+        compatible with each other, within the bounds, and are one of the accepted
+        options
         """
 
         # `countries` and `not_countries` are mutually exclusive
@@ -118,8 +116,7 @@ class ProxyFetcher:
                 val = params[key]
                 if not isinstance(val, enum_type):
                     raise ValueError(
-                        f"{key} should be of type `{enum_type}` not "
-                        f" `{type(val)}`"
+                        f"{key} should be of type `{enum_type}` not " f" `{type(val)}`"
                     )
 
         # Verify all params are valid, and satisfy the valid bounds or options
@@ -195,12 +192,10 @@ class ProxyFetcher:
     def get(self, amount: int = 1) -> List[Proxy]:
         """Attempts to get `amount` proxies matching the specified params"""
         # Remove any blacklisted proxies from the internal list
-        # Note: this needs to be done since reused proxies can sit in the
-        #       internal list of separate `ProxyFetcher`s
+        # Note: this needs to be done since reused proxies can sit in the internal list
+        #       of separate `ProxyFetcher`s
         if self._exclude_used:
-            self._proxies = [
-                p for p in self._proxies if p not in self._shared.used
-            ]
+            self._proxies = [p for p in self._proxies if p not in self._shared.used]
 
         # Get enough proxies to satisfy `amount`
         while len(self._proxies) < amount:
@@ -217,12 +212,12 @@ class ProxyFetcher:
         return temp
 
     def _fetch(self) -> Set[Proxy]:
-        """Attempts to get the proxies from pubproxy.com, will `sleep` to
-        prevent getting rate-limited
+        """Attempts to get the proxies from pubproxy.com, will `sleep` to prevent
+        getting rate-limited
         """
 
-        # Limit number of requests to 1 per `self._REQUEST_DELAY` unless an API
-        # key is provided
+        # Limit number of requests to 1 per `self._REQUEST_DELAY` unless an API key is
+        # provided
         last_time = self._shared.last_requested
         if last_time is not None and "api" not in self._params:
             delta = (dt.now() - last_time).total_seconds()

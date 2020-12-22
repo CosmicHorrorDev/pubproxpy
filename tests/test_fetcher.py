@@ -19,9 +19,7 @@ class _mock_resp:
 
 
 PROXIES = [f"{i}.{i}.{i}.{i}:1234" for i in range(5)]
-MOCK_RESP = _mock_resp(
-    json.dumps({"data": [{"ipPort": proxy} for proxy in PROXIES]})
-)
+MOCK_RESP = _mock_resp(json.dumps({"data": [{"ipPort": proxy} for proxy in PROXIES]}))
 
 
 @pytest.fixture(autouse=True)
@@ -142,13 +140,9 @@ def test_blacklist() -> None:
         # So becuase the blacklist is coordinated between the `ProxyFetcher`s
         # even though `pf1` and `pf2` will get the same proxies, they should
         # only return a single unique list between the both of them
-        assert {
-            *pf1.get(),
-            *pf2.get(),
-            *pf1.get(),
-            *pf2.get(),
-            *pf1.get(),
-        } == set(PROXIES)
+        assert {*pf1.get(), *pf2.get(), *pf1.get(), *pf2.get(), *pf1.get()} == set(
+            PROXIES
+        )
 
 
 def test_methods() -> None:
