@@ -15,4 +15,4 @@ class Protocol(Enum):
 
 ParamTypes = Union[bool, int, str, List[str], Level, Protocol]
 Params = Dict[str, ParamTypes]
-Proxy = NewType('Proxy', str)
+Proxy = NewType("Proxy", str)

@@ -1,20 +1,20 @@
-import pytest
-import requests
-
-from datetime import datetime as dt
 import json
 import os
+from datetime import datetime as dt
+from typing import Generator
 from unittest.mock import patch
 
+import pytest  # type: ignore
+import requests
 from pubproxpy import Level, Protocol, ProxyFetcher
 from pubproxpy.fetcher import _FetcherShared
 
 
 class _mock_resp:
-    def __init__(self, text):
+    def __init__(self, text: str) -> None:
         self.text = text
 
-    def raise_for_status(self):
+    def raise_for_status(self) -> None:
         pass
 
 
@@ -25,7 +25,7 @@ MOCK_RESP = _mock_resp(
 
 
 @pytest.fixture(autouse=True)
-def _cleanup():
+def _cleanup() -> Generator[None, None, None]:
     # Remove any possibly preexisting key
     if "PUBPROXY_API_KEY" in os.environ:
         del os.environ["PUBPROXY_API_KEY"]
@@ -37,7 +37,7 @@ def _cleanup():
     _FetcherShared().reset()
 
 
-def test_delay():
+def test_delay() -> None:
     pf1 = ProxyFetcher(exclude_used=False)
     pf2 = ProxyFetcher(exclude_used=False)
 
@@ -68,7 +68,7 @@ def test_delay():
         assert (dt.now() - start).total_seconds() > 1.0
 
 
-def test_params():
+def test_params() -> None:
     assert ProxyFetcher()._params == {"limit": 5, "format": "json"}
 
     # Test premium params from API key
@@ -97,21 +97,6 @@ def test_params():
         _ = ProxyFetcher(protocol="http")
 
     # And now it's time to check everything
-    before_params = {
-        "api_key": "<other key>",
-        "level": Level.ELITE,
-        "protocol": Protocol.HTTP,
-        "countries": "CA",
-        "last_checked": 1,
-        "port": 1234,
-        "time_to_connect": 2,
-        "cookies": True,
-        "google": False,
-        "https": True,
-        "post": False,
-        "referer": True,
-        "user_agent": False,
-    }
     after_params = {
         "api": "<other key>",
         "level": "elite",
@@ -129,10 +114,27 @@ def test_params():
         "format": "json",
         "limit": 20,
     }
-    assert ProxyFetcher(**before_params)._params == after_params
+    assert (
+        ProxyFetcher(
+            api_key="<other key>",
+            level=Level.ELITE,
+            protocol=Protocol.HTTP,
+            countries="CA",
+            last_checked=1,
+            port=1234,
+            time_to_connect=2,
+            cookies=True,
+            google=False,
+            https=True,
+            post=False,
+            referer=True,
+            user_agent=False,
+        )._params
+        == after_params
+    )
 
 
-def test_blacklist():
+def test_blacklist() -> None:
     pf1 = ProxyFetcher()
     pf2 = ProxyFetcher()
 
@@ -149,7 +151,7 @@ def test_blacklist():
         } == set(PROXIES)
 
 
-def test_methods():
+def test_methods() -> None:
     pf = ProxyFetcher()
 
     with patch.object(requests, "get", return_value=MOCK_RESP):
