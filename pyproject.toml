@@ -10,7 +10,7 @@ keywords = ["proxy api", "pubproxy", "public proxy", "pubproxy api", "scraping"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-requests = "^2.22"
+requests = "^2.25"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"

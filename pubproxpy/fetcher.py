@@ -88,8 +88,7 @@ class ProxyFetcher:
         self._shared = _FetcherShared()
 
     def _setup_params(self, params: Params) -> Params:
-        """Checks all of the params and renames to acutally work with the API
-        """
+        """Checks all of the params and renames to acutally work with the API"""
 
         self._verify_params(params)
 
