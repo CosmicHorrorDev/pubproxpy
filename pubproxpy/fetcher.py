@@ -6,9 +6,10 @@ from typing import Dict, List, Optional, Set, Tuple, Union, cast
 from urllib.parse import urlencode
 
 import requests
+
 from pubproxpy._singleton import Singleton
 from pubproxpy.errors import API_ERROR_MAP, ProxyError
-from pubproxpy.types import Level, Protocol, ParamTypes, Params, Proxy
+from pubproxpy.types import Level, Params, ParamTypes, Protocol, Proxy
 
 
 class _FetcherShared(metaclass=Singleton):

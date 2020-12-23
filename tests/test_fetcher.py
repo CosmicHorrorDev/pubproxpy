@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 import pytest  # type: ignore
 import requests
+
 from pubproxpy import Level, Protocol, ProxyFetcher
 from pubproxpy.fetcher import _FetcherShared
 
