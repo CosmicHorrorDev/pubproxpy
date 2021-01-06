@@ -12,6 +12,7 @@ from pubproxpy.fetcher import _FetcherShared
 
 class _mock_resp:
     def __init__(self, text):
+        self.ok = True
         self.text = text
 
     def raise_for_status(self):

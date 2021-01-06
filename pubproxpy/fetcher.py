@@ -5,6 +5,7 @@ import json
 import os
 from time import sleep
 from urllib.parse import urlencode
+from warnings import warn
 
 from pubproxpy._singleton import Singleton
 from pubproxpy.errors import ProxyError, API_ERROR_MAP
@@ -74,10 +75,18 @@ class ProxyFetcher:
         self._shared = _FetcherShared()
 
     def _setup_params(self, params):
-        """Checks all of the params and renames to acutally work with the API
-        """
+        """Checks all of the params and renames to acutally work with the API"""
 
         self._verify_params(params)
+
+        if "api_key" in params and "PUBPROXY_API_KEY" in os.environ:
+            warn(
+                "The library will be changing the precendence on overriding the API key"
+                " when it's present as both a parameter and env var. This involves a"
+                " breaking change (hence the warning) More information is available in"
+                " this issue"
+                " https://github.com/LovecraftianHorror/pubproxpy/issues/11"
+            )
 
         # Try to read api key from environment if not provided
         if "api_key" not in params and "PUBPROXY_API_KEY" in os.environ:
@@ -174,13 +183,11 @@ class ProxyFetcher:
         return params
 
     def drain(self):
-        """Returns any proxies remaining in the current list
-        """
+        """Returns any proxies remaining in the current list"""
         return self.get(len(self._proxies))
 
     def get(self, amount=1):
-        """Attempts to get `amount` proxies matching the specified params
-        """
+        """Attempts to get `amount` proxies matching the specified params"""
         # Remove any blacklisted proxies from the internal list
         # Note: this needs to be done since reused proxies can sit in the
         #       internal list of separate `ProxyFetcher`s
@@ -219,6 +226,15 @@ class ProxyFetcher:
 
         # Query the api
         resp = requests.get(self._query)
+
+        if not resp.ok:
+            warn(
+                "The library will be changing how API errors are exposed, so that the"
+                " different conditions are expressed with different error classes. This"
+                " will be a breaking change (hence the warning). More information is"
+                " available in this issue"
+                " https://github.com/LovecraftianHorror/pubproxpy/issues/11"
+            )
         # And ensure the response is ok
         resp.raise_for_status()
 
