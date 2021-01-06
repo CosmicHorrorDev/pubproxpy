@@ -97,7 +97,7 @@ def test_params() -> None:
 
     # And now it's time to check everything
     after_params = {
-        "api": "<other key>",
+        "api": "<key>",
         "level": "elite",
         "type": "http",
         "country": "CA",
@@ -115,7 +115,7 @@ def test_params() -> None:
     }
     assert (
         ProxyFetcher(
-            api_key="<other key>",
+            api_key="<key>",
             level=Level.ELITE,
             protocol=Protocol.HTTP,
             countries="CA",

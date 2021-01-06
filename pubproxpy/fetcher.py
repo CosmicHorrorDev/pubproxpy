@@ -91,8 +91,8 @@ class ProxyFetcher:
 
         self._verify_params(params)
 
-        # Try to read api key from environment if not provided
-        if "api_key" not in params and "PUBPROXY_API_KEY" in os.environ:
+        # Use API key from env var if passed in
+        if "PUBPROXY_API_KEY" in os.environ:
             params["api_key"] = os.environ["PUBPROXY_API_KEY"]
 
         params = self._rename_params(params)
