@@ -35,8 +35,7 @@ _NO_PROXY_ERROR_MESSAGE = (
 
 
 class ProxyError(Exception):
-    """Generic base error
-    """
+    """Generic base error"""
 
     def __init__(self, response, message=_PROXY_ERROR_MESSAGE):
         if response is None:
@@ -46,32 +45,28 @@ class ProxyError(Exception):
 
 
 class APIKeyError(ProxyError):
-    """Error for incorrect API key response
-    """
+    """Error for incorrect API key response"""
 
     def __init__(self, message=_API_KEY_ERROR_MESSAGE):
         super().__init__(None, message)
 
 
 class RateLimitError(ProxyError):
-    """Error for rate limiting response
-    """
+    """Error for rate limiting response"""
 
     def __init__(self, message=_RATE_LIMIT_ERROR_MESSAGE):
         super().__init__(None, message)
 
 
 class DailyLimitError(ProxyError):
-    """Error for hitting the daily request limit
-    """
+    """Error for hitting the daily request limit"""
 
     def __init__(self, message=_DAILY_LIMIT_ERROR_MESSAGE):
         super().__init__(None, message)
 
 
 class NoProxyError(ProxyError):
-    """Error for getting the "No Proxy" response
-    """
+    """Error for getting the "No Proxy" response"""
 
     def __init__(self, message=_NO_PROXY_ERROR_MESSAGE):
         super().__init__(None, message)
