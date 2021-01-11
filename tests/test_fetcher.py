@@ -1,37 +1,23 @@
 import json
 import os
 from datetime import datetime as dt
-from typing import Generator
 
 import pytest  # type: ignore
-from httmock import HTTMock, all_requests  # type: ignore
+from httmock import HTTMock, urlmatch  # type: ignore
 
 from pubproxpy import Level, Protocol, ProxyFetcher
-from pubproxpy.fetcher import _FetcherShared
 from tests.constants import ASSETS_DIR
 
-with (ASSETS_DIR / "sample_response.json").open() as f:
-    MOCK_RESP = f.read()
+with (ASSETS_DIR / "good_resp.json").open() as f:
+    GOOD_RESP = json.load(f)
 
-PROXIES = [entry["ipPort"] for entry in json.loads(MOCK_RESP)["data"]]
-
-
-@all_requests
-def good_resp(_url, _request):
-    return MOCK_RESP
+PROXIES = [entry["ipPort"] for entry in GOOD_RESP["content"]["data"]]
 
 
-@pytest.fixture(autouse=True)
-def _cleanup() -> Generator[None, None, None]:
-    # Remove any possibly preexisting key
-    if "PUBPROXY_API_KEY" in os.environ:
-        del os.environ["PUBPROXY_API_KEY"]
-
-    yield  # <-- The test runs here
-
-    # Cleanup up the shared junk from the `Singleton` (also note that this is
-    # one of the pains of using a singleton)
-    _FetcherShared().reset()
+# FIXME: have mock to raise error when calling api without trying to
+@urlmatch(netloc=r"pubproxy\.com")
+def good_resp(_url, _request) -> dict:
+    return GOOD_RESP
 
 
 def test_delay() -> None:

@@ -7,6 +7,7 @@ from urllib.parse import urlencode
 
 import requests
 
+from pubproxpy._constants import API_BASE
 from pubproxpy._singleton import Singleton
 from pubproxpy.errors import API_ERROR_MAP, ProxyError
 from pubproxpy.types import Level, Params, ParamTypes, Protocol, Proxy
@@ -40,8 +41,6 @@ class ProxyFetcher:
     _proxies: List[Proxy]
     _query: str
     _shared: _FetcherShared
-
-    _BASE_URI: str = "http://pubproxy.com/api/proxy?"
 
     # Parameters used by `ProxyFetcher` for the pubproxy api
     _PARAMS: Tuple[str, ...] = (
@@ -77,7 +76,7 @@ class ProxyFetcher:
 
         # Setup `_params` and `_query`
         self._params = self._setup_params(params)
-        self._query = f"{self._BASE_URI}{urlencode(self._params)}"
+        self._query = f"{API_BASE}{urlencode(self._params)}"
 
         # List of unused proxies to give
         self._proxies = []
