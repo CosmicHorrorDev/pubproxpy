@@ -9,6 +9,7 @@ import requests
 
 from pubproxpy import Level, Protocol, ProxyFetcher
 from pubproxpy.fetcher import _FetcherShared
+from tests.constants import ASSETS_DIR
 
 
 class _mock_resp:
@@ -19,8 +20,10 @@ class _mock_resp:
         pass
 
 
-PROXIES = [f"{i}.{i}.{i}.{i}:1234" for i in range(5)]
-MOCK_RESP = _mock_resp(json.dumps({"data": [{"ipPort": proxy} for proxy in PROXIES]}))
+with (ASSETS_DIR / "sample_response.json").open() as f:
+    MOCK_RESP = _mock_resp(f.read())
+
+PROXIES = [entry["ipPort"] for entry in json.loads(MOCK_RESP.text)["data"]]
 
 
 @pytest.fixture(autouse=True)

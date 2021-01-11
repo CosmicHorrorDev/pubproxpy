@@ -1,0 +1,100 @@
+{
+  "data": [
+    {
+      "ipPort": "103.228.117.244:8080",
+      "ip": "103.228.117.244",
+      "port": "8080",
+      "country": "ID",
+      "last_checked": "2021-01-11 08:19:08",
+      "proxy_level": "anonymous",
+      "type": "http",
+      "speed": "13",
+      "support": {
+        "https": 1,
+        "get": 1,
+        "post": 1,
+        "cookies": 1,
+        "referer": 1,
+        "user_agent": 1,
+        "google": 0
+      }
+    },
+    {
+      "ipPort": "201.204.46.10:39371",
+      "ip": "201.204.46.10",
+      "port": "39371",
+      "country": "CR",
+      "last_checked": "2021-01-11 08:22:48",
+      "proxy_level": "elite",
+      "type": "http",
+      "speed": "12",
+      "support": {
+        "https": 0,
+        "get": 1,
+        "post": 1,
+        "cookies": 1,
+        "referer": 1,
+        "user_agent": 1,
+        "google": 0
+      }
+    },
+    {
+      "ipPort": "125.62.213.30:8000",
+      "ip": "125.62.213.30",
+      "port": "8000",
+      "country": "IN",
+      "last_checked": "2021-01-11 08:22:48",
+      "proxy_level": "anonymous",
+      "type": "http",
+      "speed": "18",
+      "support": {
+        "https": 1,
+        "get": 1,
+        "post": 1,
+        "cookies": 1,
+        "referer": 1,
+        "user_agent": 1,
+        "google": 0
+      }
+    },
+    {
+      "ipPort": "192.109.165.41:80",
+      "ip": "192.109.165.41",
+      "port": "80",
+      "country": "",
+      "last_checked": "2021-01-11 08:38:50",
+      "proxy_level": "anonymous",
+      "type": "http",
+      "speed": "9",
+      "support": {
+        "https": 0,
+        "get": 1,
+        "post": 1,
+        "cookies": 1,
+        "referer": 1,
+        "user_agent": 1,
+        "google": 0
+      }
+    },
+    {
+      "ipPort": "31.28.99.25:31396",
+      "ip": "31.28.99.25",
+      "port": "31396",
+      "country": "RU",
+      "last_checked": "2021-01-11 08:32:20",
+      "proxy_level": "elite",
+      "type": "socks4",
+      "speed": "20",
+      "support": {
+        "https": 0,
+        "get": 1,
+        "post": 1,
+        "cookies": 1,
+        "referer": 1,
+        "user_agent": 1,
+        "google": 0
+      }
+    }
+  ],
+  "count": 5
+}
