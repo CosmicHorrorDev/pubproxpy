@@ -14,7 +14,7 @@ RATE_LIMIT_RESP = (
     " http://pubproxy.com/#premium"
 )
 DAILY_LIMIT_RESP = (
-    "You have reached the maximum 50 requests for today. Get your API to make unlimited"
+    "You reached the maximum 50 requests for today. Get your API to make unlimited"
     " requests at http://pubproxy.com/#premium"
 )
 NO_PROXY_RESP = "No proxy"

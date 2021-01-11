@@ -228,12 +228,11 @@ class ProxyFetcher:
 
         # Query the api
         resp = requests.get(self._query)
-        # And ensure the response is ok
-        resp.raise_for_status()
 
         try:
             data = json.loads(resp.text)["data"]
         except json.decoder.JSONDecodeError:
+            # Try to match on known error message with fallback to unknown error
             raise API_ERROR_MAP.get(resp.text) or ProxyError(resp)
 
         # Get the returned list of proxies
