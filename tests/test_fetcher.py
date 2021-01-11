@@ -2,28 +2,23 @@ import json
 import os
 from datetime import datetime as dt
 from typing import Generator
-from unittest.mock import patch
 
 import pytest  # type: ignore
-import requests
+from httmock import HTTMock, all_requests  # type: ignore
 
 from pubproxpy import Level, Protocol, ProxyFetcher
 from pubproxpy.fetcher import _FetcherShared
 from tests.constants import ASSETS_DIR
 
-
-class _mock_resp:
-    def __init__(self, text: str) -> None:
-        self.text = text
-
-    def raise_for_status(self) -> None:
-        pass
-
-
 with (ASSETS_DIR / "sample_response.json").open() as f:
-    MOCK_RESP = _mock_resp(f.read())
+    MOCK_RESP = f.read()
 
-PROXIES = [entry["ipPort"] for entry in json.loads(MOCK_RESP.text)["data"]]
+PROXIES = [entry["ipPort"] for entry in json.loads(MOCK_RESP)["data"]]
+
+
+@all_requests
+def good_resp(_url, _request):
+    return MOCK_RESP
 
 
 @pytest.fixture(autouse=True)
@@ -47,7 +42,8 @@ def test_delay() -> None:
     os.environ["PUBPROXY_API_KEY"] = "<key>"
     premium_pf = ProxyFetcher(exclude_used=False)
 
-    with patch.object(requests, "get", return_value=MOCK_RESP):
+    # with patch.object(requests, "get", return_value=MOCK_RESP):
+    with HTTMock(good_resp):
         _ = pf1.get()
 
         # Make sure there is a delay for the same one
@@ -84,11 +80,6 @@ def test_params() -> None:
     # Check that going out of bounds is a no no
     with pytest.raises(ValueError):
         _ = ProxyFetcher(last_checked=0)
-
-    # Same with choosing an incorrect option
-    with pytest.raises(ValueError):
-        # Fat-fingered
-        _ = ProxyFetcher(level="eilte")
 
     # `countries` and `not_countries` are incompatilbe
     with pytest.raises(ValueError):
@@ -140,7 +131,7 @@ def test_blacklist() -> None:
     pf1 = ProxyFetcher()
     pf2 = ProxyFetcher()
 
-    with patch.object(requests, "get", return_value=MOCK_RESP):
+    with HTTMock(good_resp):
         # So becuase the blacklist is coordinated between the `ProxyFetcher`s
         # even though `pf1` and `pf2` will get the same proxies, they should
         # only return a single unique list between the both of them
@@ -152,7 +143,7 @@ def test_blacklist() -> None:
 def test_methods() -> None:
     pf = ProxyFetcher()
 
-    with patch.object(requests, "get", return_value=MOCK_RESP):
+    with HTTMock(good_resp):
         single = pf.get()
         assert len(single) == 1
 
