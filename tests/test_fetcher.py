@@ -1,39 +1,23 @@
 import json
 import os
 from datetime import datetime as dt
-from typing import Generator
-from unittest.mock import patch
 
 import pytest  # type: ignore
-import requests
+from httmock import HTTMock, urlmatch  # type: ignore
 
 from pubproxpy import Level, Protocol, ProxyFetcher
-from pubproxpy.fetcher import _FetcherShared
+from tests.constants import ASSETS_DIR
+
+with (ASSETS_DIR / "good_resp.json").open() as f:
+    GOOD_RESP = json.load(f)
+
+PROXIES = [entry["ipPort"] for entry in GOOD_RESP["content"]["data"]]
 
 
-class _mock_resp:
-    def __init__(self, text: str) -> None:
-        self.text = text
-
-    def raise_for_status(self) -> None:
-        pass
-
-
-PROXIES = [f"{i}.{i}.{i}.{i}:1234" for i in range(5)]
-MOCK_RESP = _mock_resp(json.dumps({"data": [{"ipPort": proxy} for proxy in PROXIES]}))
-
-
-@pytest.fixture(autouse=True)
-def _cleanup() -> Generator[None, None, None]:
-    # Remove any possibly preexisting key
-    if "PUBPROXY_API_KEY" in os.environ:
-        del os.environ["PUBPROXY_API_KEY"]
-
-    yield  # <-- The test runs here
-
-    # Cleanup up the shared junk from the `Singleton` (also note that this is
-    # one of the pains of using a singleton)
-    _FetcherShared().reset()
+# FIXME: have mock to raise error when calling api without trying to
+@urlmatch(netloc=r"pubproxy\.com")
+def good_resp(_url, _request) -> dict:
+    return GOOD_RESP
 
 
 def test_delay() -> None:
@@ -44,7 +28,8 @@ def test_delay() -> None:
     os.environ["PUBPROXY_API_KEY"] = "<key>"
     premium_pf = ProxyFetcher(exclude_used=False)
 
-    with patch.object(requests, "get", return_value=MOCK_RESP):
+    # with patch.object(requests, "get", return_value=MOCK_RESP):
+    with HTTMock(good_resp):
         _ = pf1.get()
 
         # Make sure there is a delay for the same one
@@ -82,11 +67,6 @@ def test_params() -> None:
     with pytest.raises(ValueError):
         _ = ProxyFetcher(last_checked=0)
 
-    # Same with choosing an incorrect option
-    with pytest.raises(ValueError):
-        # Fat-fingered
-        _ = ProxyFetcher(level="eilte")
-
     # `countries` and `not_countries` are incompatilbe
     with pytest.raises(ValueError):
         _ = ProxyFetcher(countries="US", not_countries=["CA", "NK"])
@@ -97,7 +77,7 @@ def test_params() -> None:
 
     # And now it's time to check everything
     after_params = {
-        "api": "<other key>",
+        "api": "<key>",
         "level": "elite",
         "type": "http",
         "country": "CA",
@@ -115,7 +95,7 @@ def test_params() -> None:
     }
     assert (
         ProxyFetcher(
-            api_key="<other key>",
+            api_key="<key>",
             level=Level.ELITE,
             protocol=Protocol.HTTP,
             countries="CA",
@@ -137,7 +117,7 @@ def test_blacklist() -> None:
     pf1 = ProxyFetcher()
     pf2 = ProxyFetcher()
 
-    with patch.object(requests, "get", return_value=MOCK_RESP):
+    with HTTMock(good_resp):
         # So becuase the blacklist is coordinated between the `ProxyFetcher`s
         # even though `pf1` and `pf2` will get the same proxies, they should
         # only return a single unique list between the both of them
@@ -149,7 +129,7 @@ def test_blacklist() -> None:
 def test_methods() -> None:
     pf = ProxyFetcher()
 
-    with patch.object(requests, "get", return_value=MOCK_RESP):
+    with HTTMock(good_resp):
         single = pf.get()
         assert len(single) == 1
 

@@ -1,0 +1,4 @@
+{
+    "status_code": 503,
+    "content": "We have to temporarily stop you. You're requesting proxies a little too fast (2+ requests per second). Get your API to remove this limit at http://pubproxy.com/#premium"
+}

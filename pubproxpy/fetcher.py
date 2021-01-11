@@ -7,6 +7,7 @@ from urllib.parse import urlencode
 
 import requests
 
+from pubproxpy._constants import API_BASE
 from pubproxpy._singleton import Singleton
 from pubproxpy.errors import API_ERROR_MAP, ProxyError
 from pubproxpy.types import Level, Params, ParamTypes, Protocol, Proxy
@@ -40,8 +41,6 @@ class ProxyFetcher:
     _proxies: List[Proxy]
     _query: str
     _shared: _FetcherShared
-
-    _BASE_URI: str = "http://pubproxy.com/api/proxy?"
 
     # Parameters used by `ProxyFetcher` for the pubproxy api
     _PARAMS: Tuple[str, ...] = (
@@ -77,7 +76,7 @@ class ProxyFetcher:
 
         # Setup `_params` and `_query`
         self._params = self._setup_params(params)
-        self._query = f"{self._BASE_URI}{urlencode(self._params)}"
+        self._query = f"{API_BASE}{urlencode(self._params)}"
 
         # List of unused proxies to give
         self._proxies = []
@@ -91,8 +90,8 @@ class ProxyFetcher:
 
         self._verify_params(params)
 
-        # Try to read api key from environment if not provided
-        if "api_key" not in params and "PUBPROXY_API_KEY" in os.environ:
+        # Use API key from env var if passed in
+        if "PUBPROXY_API_KEY" in os.environ:
             params["api_key"] = os.environ["PUBPROXY_API_KEY"]
 
         params = self._rename_params(params)
@@ -228,12 +227,11 @@ class ProxyFetcher:
 
         # Query the api
         resp = requests.get(self._query)
-        # And ensure the response is ok
-        resp.raise_for_status()
 
         try:
             data = json.loads(resp.text)["data"]
         except json.decoder.JSONDecodeError:
+            # Try to match on known error message with fallback to unknown error
             raise API_ERROR_MAP.get(resp.text) or ProxyError(resp)
 
         # Get the returned list of proxies
