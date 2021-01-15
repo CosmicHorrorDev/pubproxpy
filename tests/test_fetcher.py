@@ -1,10 +1,10 @@
-import pytest
-import requests
-
-from datetime import datetime as dt
 import json
 import os
+from datetime import datetime as dt
 from unittest.mock import patch
+
+import pytest
+import requests
 
 from pubproxpy import Level, Protocol, ProxyFetcher
 from pubproxpy.fetcher import _FetcherShared
