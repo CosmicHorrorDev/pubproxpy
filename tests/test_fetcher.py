@@ -14,12 +14,14 @@ with (ASSETS_DIR / "good_resp.json").open() as f:
 PROXIES = [entry["ipPort"] for entry in GOOD_RESP["content"]["data"]]
 
 
-# FIXME: have mock to raise error when calling api without trying to
 @urlmatch(netloc=r"pubproxy\.com")
 def good_resp(_url, _request) -> dict:
     return GOOD_RESP
 
 
+# TODO: could add a test to make sure the new delaying style works correctly. A property
+# test with a random delay before and after the check for rate limiting is done should
+# work well
 def test_delay() -> None:
     pf1 = ProxyFetcher(exclude_used=False)
     pf2 = ProxyFetcher(exclude_used=False)

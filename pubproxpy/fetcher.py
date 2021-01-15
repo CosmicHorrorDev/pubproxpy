@@ -7,7 +7,7 @@ from urllib.parse import urlencode
 
 import requests
 
-from pubproxpy._constants import API_BASE
+from pubproxpy._constants import API_BASE, REQUEST_DELAY
 from pubproxpy._singleton import Singleton
 from pubproxpy.errors import API_ERROR_MAP, ProxyError
 from pubproxpy.types import Level, Params, ParamTypes, Protocol, Proxy
@@ -65,11 +65,6 @@ class ProxyFetcher:
         "last_checked": (1, 1000),
         "time_to_connect": (1, 60),
     }
-
-    # Request delay for keyless request limiting in seconds
-    # Note: Requests are supposed to be limited to 1 per second, but 1.0 and 1.01
-    #       sometimes still triggers the rate limit so 1.05 was picked
-    _REQUEST_DELAY: float = 1.05
 
     def __init__(self, *, exclude_used: bool = True, **params: ParamTypes) -> None:
         self._exclude_used = exclude_used
@@ -221,12 +216,12 @@ class ProxyFetcher:
         last_time = self._shared.last_requested
         if last_time is not None and "api" not in self._params:
             delta = (dt.now() - last_time).total_seconds()
-            if delta < self._REQUEST_DELAY:
-                sleep(self._REQUEST_DELAY - delta)
-        self._shared.last_requested = dt.now()
+            if delta < REQUEST_DELAY:
+                sleep(REQUEST_DELAY - delta)
 
         # Query the api
         resp = requests.get(self._query)
+        self._shared.last_requested = dt.now()
 
         try:
             data = json.loads(resp.text)["data"]
